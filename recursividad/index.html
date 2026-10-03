@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recursividad paso a paso</title>
+<meta name="description" content="Visualizador interactivo de la recursividad con factorial(n) y fibonacci(n): pila de llamadas, árbol de llamadas, ocupación de memoria, desbordamiento aritmético (int/long) y StackOverflowError. Material de Programación 1º DAM.">
+<meta name="author" content="David Martínez Peña">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f9; --surface: #ffffff; --surface-2: #eef0f6; --ink: #1b1f2a; --muted: #545b6b; --line: #d9dde7;
+  --accent: #3949ab; --accent-soft: #e5e8f7; --accent-ink: #ffffff;
+  --wait-soft: #eceef3; --base: #00695c; --base-soft: #ddf2ee; --arith: #a84300; --arith-soft: #fff0e0;
+  --so: #b71c1c; --so-soft: #fde8e8; --tag-ink: #ffffff;
+  --code-bg: #f7f8fc; --code-line: #fff3c4; --kw: #3949ab; --str: #8a4b00; --num: #00695c;
+  --mem-ok: #2e7d6b; --mem-warn: #c77700; --mem-danger: #b71c1c; --mem-empty: #e2e5ee;
+  --shadow: 0 1px 2px rgba(20, 25, 45, .06), 0 2px 8px rgba(20, 25, 45, .05);
+  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11131a; --surface: #1a1d27; --surface-2: #232736; --ink: #e7e9f0; --muted: #a5abbb; --line: #2f3446;
+    --accent: #9fa8ff; --accent-soft: #272d4f; --accent-ink: #11131a;
+    --wait-soft: #232736; --base: #6fd3c1; --base-soft: #163530; --arith: #ffb26b; --arith-soft: #3a2611;
+    --so: #ff8a80; --so-soft: #3d1a1a; --tag-ink: #11131a;
+    --code-bg: #151822; --code-line: #3a3417; --kw: #9fa8ff; --str: #ffcc80; --num: #6fd3c1;
+    --mem-ok: #4db6a0; --mem-warn: #ffb74d; --mem-danger: #ff6e66; --mem-empty: #2c3142;
+    --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11131a; --surface: #1a1d27; --surface-2: #232736; --ink: #e7e9f0; --muted: #a5abbb; --line: #2f3446;
+  --accent: #9fa8ff; --accent-soft: #272d4f; --accent-ink: #11131a;
+  --wait-soft: #232736; --base: #6fd3c1; --base-soft: #163530; --arith: #ffb26b; --arith-soft: #3a2611;
+  --so: #ff8a80; --so-soft: #3d1a1a; --tag-ink: #11131a;
+  --code-bg: #151822; --code-line: #3a3417; --kw: #9fa8ff; --str: #ffcc80; --num: #6fd3c1;
+  --mem-ok: #4db6a0; --mem-warn: #ffb74d; --mem-danger: #ff6e66; --mem-empty: #2c3142;
+  --shadow: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+code, pre, .mono { font-family: var(--mono); font-variant-ligatures: none; } /* sin ligaduras: que <= y == se vean tal cual */
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Banner de origen (común a todas las páginas de 1DAMInteractivo) ---------- */
+.origen {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px;
+  padding: 7px 16px; background: #1f2a6b; color: #fff;
+  font-family: var(--font); font-size: 13px; line-height: 1.35;
+}
+.origen a { color: #fff; text-decoration: none; }
+.origen a:hover { text-decoration: underline; }
+.origen-marca { display: inline-flex; align-items: center; gap: 8px; }
+.origen-marca svg { flex: none; }
+.origen-autor { opacity: .85; }
+.origen-enlaces { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-left: auto; }
+.origen-enlaces a { color: #c5cdff; font-weight: 500; }
+/* ------------------------------------------------------------------------------------ */
+
+.pagina { max-width: 1320px; margin: 0 auto; padding: 12px 16px 24px; }
+.titular { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 10px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 700; }
+.tema {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; cursor: pointer;
+}
+.tema svg { width: 16px; height: 16px; }
+h2 { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+
+/* Barra de configuración y reproducción */
+.barra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 8px 12px; margin-bottom: 10px; font-size: 13px; }
+.grupo { display: flex; align-items: center; gap: 8px; }
+.etq { font-size: 12px; font-weight: 600; color: var(--muted); }
+.sep { width: 1px; align-self: stretch; background: var(--line); }
+input[type=range] { accent-color: var(--accent); height: 24px; }
+.n-range { width: 110px; }
+.num-in { width: 58px; height: 36px; padding: 0 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 14px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg-b { min-width: 52px; height: 36px; padding: 0 10px; border: 0; background: var(--surface); font-family: var(--mono); font-weight: 600; font-size: 14px; cursor: pointer; }
+.seg-b + .seg-b { border-left: 1px solid var(--line); }
+.seg-b[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg-b:focus-visible { outline-offset: -3px; }
+.sel { height: 36px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 13px; max-width: 220px; }
+.botones { display: flex; gap: 4px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 40px; height: 40px; padding: 0 8px; font-size: 13px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn svg { width: 18px; height: 18px; }
+.btn.primario { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); padding: 0 12px; font-weight: 600; min-width: 118px; }
+.vel-range { width: 80px; }
+.velocidad output { min-width: 40px; }
+.progreso { flex: 1 1 200px; display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.progreso input { flex: 1; min-width: 80px; }
+.progreso span { white-space: nowrap; }
+
+/* Estado: fases + mensaje */
+.estado { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 8px 12px; margin-bottom: 10px; }
+.fases { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.fases li { padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; border: 1px solid var(--line); color: var(--muted); }
+.fases li.actual { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.fases li.hecha { color: var(--ink); background: var(--surface-2); }
+.fases li.so { background: var(--so); border-color: var(--so); color: var(--tag-ink); }
+.fases li.oculta { display: none; }
+.msg { margin: 0; flex: 1 1 420px; font-size: 15px; line-height: 1.5; min-height: 3em; } /* siempre 2 líneas: evita saltos */
+.msg code { font-size: .92em; background: var(--surface-2); padding: 0 4px; border-radius: 4px; }
+.msg .marca-arith { color: var(--arith); font-weight: 700; }
+.msg .marca-so { color: var(--so); font-weight: 700; }
+
+/* Avisos contextuales: solo aparecen cuando ocurre cada caso */
+.aviso-caso { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid; font-size: 14px; }
+.aviso-caso svg { flex: none; width: 20px; height: 20px; margin-top: 1px; }
+.aviso-caso p { margin: 0; }
+.aviso-caso strong { display: block; }
+.aviso-caso.arith { background: var(--arith-soft); border-color: var(--arith); }
+.aviso-caso.arith strong, .aviso-caso.arith svg { color: var(--arith); }
+.aviso-caso.so { background: var(--so-soft); border-color: var(--so); }
+.aviso-caso.so strong, .aviso-caso.so svg { color: var(--so); }
+
+/* Rejilla: código y consola a la izquierda; a la derecha la pila (y, con fibonacci, el árbol debajo) */
+.rejilla { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "codigo" "pila" "arbol" "consola"; }
+@media (min-width: 720px) {
+  .rejilla {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas: "codigo pila" "consola pila";
+    grid-template-rows: auto 1fr; align-items: start;
+  }
+  .rejilla .panel-pila { align-self: stretch; }
+  .rejilla.con-arbol { grid-template-areas: "codigo pila" "consola arbol"; }
+  .rejilla.con-arbol .panel-pila { align-self: start; }
+  .rejilla.con-arbol .panel-arbol { align-self: stretch; }
+}
+.panel-arbol { grid-area: arbol; }
+.panel { padding: 12px 12px 14px; min-width: 0; }
+.panel-codigo { grid-area: codigo; }
+.panel-pila { grid-area: pila; }
+.panel-consola { grid-area: consola; }
+
+/* Código */
+.codigo {
+  margin: 0; padding: 10px 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  overflow-x: auto; font-size: 13.5px; line-height: 1.7;
+}
+.codigo .ln { display: flex; padding-right: 12px; border-left: 3px solid transparent; }
+.codigo .ln .num { flex: none; width: 36px; padding-right: 10px; text-align: right; color: var(--muted); user-select: none; }
+.codigo .ln .txt { white-space: pre; }
+.codigo .ln.actual { background: var(--code-line); border-left-color: var(--accent); }
+.codigo .ln.actual .num { color: var(--ink); font-weight: 600; }
+.codigo .kw { color: var(--kw); font-weight: 600; }
+.codigo .str { color: var(--str); }
+.codigo .n { color: var(--num); }
+
+/* Pila y memoria */
+.mem-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; margin-bottom: 6px; }
+.mem-cab strong { font-family: var(--mono); font-size: 13px; }
+.celdas { display: grid; gap: 2px; height: 18px; }
+.celda { border-radius: 2px; background: var(--mem-empty); }
+.celdas.ok .celda.llena { background: var(--mem-ok); }
+.celdas.aviso .celda.llena { background: var(--mem-warn); }
+.celdas.peligro .celda.llena { background: var(--mem-danger); }
+.celdas.desborde .celda { background: var(--mem-danger); animation: parpadeo .5s ease-in-out 3; }
+.mem-nota { margin: 6px 0 10px; font-size: 12px; color: var(--muted); }
+.mem-nota.desborde { color: var(--so); font-weight: 600; }
+@keyframes parpadeo { 50% { opacity: .35; } }
+
+.marcos-caja { max-height: 680px; overflow-y: auto; padding-right: 2px; }
+.marcos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.marco { border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; background: var(--wait-soft); font-size: 13px; }
+.m-cab { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.m-cab code { font-weight: 600; font-size: 13.5px; }
+.m-tag { flex: none; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+.m-vars { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 3px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.m-vars .val { color: var(--ink); font-weight: 600; }
+.m-alerta { margin-top: 4px; font-size: 12px; color: var(--arith); font-weight: 600; }
+.m-alerta .mono { font-weight: 400; word-break: break-all; }
+.marco.activo { background: var(--accent-soft); border: 2px solid var(--accent); padding: 6px 9px; }
+.marco.activo .m-tag { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.marco.base { background: var(--base-soft); border-color: var(--base); }
+.marco.base .m-tag, .marco.devuelve .m-tag { background: var(--base); border-color: var(--base); color: var(--tag-ink); }
+.marco.arith { background: var(--arith-soft); border: 2px solid var(--arith); padding: 6px 9px; }
+.marco.arith .m-tag { background: var(--arith); border-color: var(--arith); color: var(--tag-ink); }
+.marco.erroneo { border-color: var(--arith); border-style: dashed; }
+.marco.fantasma { background: var(--so-soft); border: 2px dashed var(--so); color: var(--so); }
+.marco.fantasma .m-tag { background: var(--so); border-color: var(--so); color: var(--tag-ink); }
+.marco.principal { margin-top: 6px; background: var(--surface-2); border-style: dashed; }
+.marco.entra { animation: entra .35s ease-out; }
+.recibe { animation: recibe .9s ease-out; border-radius: 3px; }
+@keyframes entra { from { opacity: 0; transform: translateY(-10px); } }
+@keyframes recibe { from { background: #fff59d; color: #1b1f2a; } }
+.pila-vacia { font-size: 13px; color: var(--muted); padding: 10px; text-align: center; border: 1px dashed var(--line); border-radius: 8px; }
+
+/* Árbol de llamadas (fibonacci) */
+.arbol-caja { overflow: auto; max-height: 420px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.arbol-caja svg { display: block; margin: 0 auto; }
+.arista { stroke: var(--line); stroke-width: 1.5; }
+.arista.pila { stroke: var(--accent); stroke-width: 3; }
+.nodo rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.nodo text { fill: var(--ink); font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.nodo .val { fill: var(--base); }
+.nodo.activo rect { fill: var(--accent); stroke: var(--accent); }
+.nodo.activo .lbl { fill: var(--accent-ink); }
+.nodo.espera rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.nodo.hecho rect { fill: var(--base-soft); stroke: var(--base); }
+.nodo.fantasma rect { fill: var(--so-soft); stroke: var(--so); stroke-dasharray: 4 3; stroke-width: 2; }
+.nodo.fantasma text { fill: var(--so); }
+.nodo.entra { animation: entra .35s ease-out; }
+.leyenda { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+
+/* Consola */
+.salida {
+  margin: 0; min-height: 200px; max-height: 300px; overflow: auto;
+  padding: 10px 12px; border-radius: 8px; background: #0f1117; color: #e3e6ee;
+  font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+}
+.salida .err { color: #ff8a80; }
+.salida .nueva { color: #fff59d; }
+.salida .vacia { color: #8b92a5; font-style: italic; }
+.resultado { margin-top: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); font-size: 14px; }
+.resultado.ok { background: var(--base-soft); border-color: var(--base); }
+.resultado.mal { background: var(--arith-soft); border-color: var(--arith); }
+.resultado.so { background: var(--so-soft); border-color: var(--so); }
+.resultado dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; margin: 6px 0 0; }
+.resultado dt { color: var(--muted); font-size: 13px; }
+.resultado dd { margin: 0; font-family: var(--mono); font-size: 13px; word-break: break-all; }
+.resultado strong { display: block; }
+
+kbd { font-family: var(--mono); font-size: 11px; padding: 0 5px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); }
+.pie { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: center; }
+
+@media (max-width: 520px) {
+  .btn.primario { min-width: 0; flex: 1; }
+  .botones { flex: 1 1 100%; }
+  .sep { display: none; }
+  .tema span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Banner de origen: obligatorio en todas las páginas de 1DAMInteractivo -->
+<div class="origen">
+  <a class="origen-marca" href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+    <span>Recurso de <strong>Programación 1º DAM</strong></span>
+  </a>
+  <span class="origen-autor">David Martínez Peña · CC BY-NC-SA 4.0</span>
+  <span class="origen-enlaces">
+    <a href="https://martinezpenya.es/1DAMProgramacion/UD04/UD04_ES.html#recursividad" target="_blank" rel="noopener">Teoría: Recursividad (UD04)</a>
+    <a href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">martinezpenya.es/1DAMProgramacion ↗</a>
+  </span>
+</div>
+
+<div class="pagina">
+  <header class="titular">
+    <span class="eyebrow">UD04 · Recursividad</span>
+    <h1><code id="titulo">factorial(n)</code> paso a paso</h1>
+    <button type="button" class="tema" id="bTema" aria-label="Cambiar a tema oscuro">
+      <svg id="icoLuna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg id="icoSol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <span id="txtTema">Tema oscuro</span>
+    </button>
+  </header>
+
+  <section class="tarjeta barra" aria-label="Configuración y reproducción">
+    <div class="seg" role="group" aria-label="Método recursivo">
+      <button type="button" class="seg-b" id="aFact" aria-pressed="true">factorial()</button>
+      <button type="button" class="seg-b" id="aFib" aria-pressed="false">fibonacci()</button>
+    </div>
+    <div class="grupo">
+      <label class="etq" for="nNum">n</label>
+      <input class="n-range" type="range" id="nRange" min="0" max="60" value="4" aria-label="Valor de n (deslizador)">
+      <input class="num-in" type="number" id="nNum" min="0" max="100" value="4" inputmode="numeric">
+    </div>
+    <div class="seg" role="group" aria-label="Tipo de retorno" id="segTipo">
+      <button type="button" class="seg-b" id="tInt" aria-pressed="true">int</button>
+      <button type="button" class="seg-b" id="tLong" aria-pressed="false">long</button>
+    </div>
+    <div class="grupo">
+      <label class="etq" for="limite">Pila</label>
+      <input class="num-in" type="number" id="limite" min="3" max="60" value="25" inputmode="numeric" title="Tamaño de la pila, en marcos">
+    </div>
+    <select class="sel" id="casos" aria-label="Casos de ejemplo">
+      <option value="">Casos de ejemplo…</option>
+    </select>
+    <span class="sep" aria-hidden="true"></span>
+    <div class="botones">
+      <button type="button" class="btn" id="bInicio" aria-label="Volver al principio" title="Volver al principio (Inicio)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14"/><path d="M18 6l-9 6 9 6z"/></svg>
+      </button>
+      <button type="button" class="btn" id="bAtras" aria-label="Paso atrás" title="Paso atrás (←)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <button type="button" class="btn primario" id="bPlay" title="Reproducir / pausa (espacio)">
+        <svg id="icoPlay" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg>
+        <svg id="icoPausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <span id="txtPlay">Reproducir</span>
+      </button>
+      <button type="button" class="btn" id="bAdelante" aria-label="Paso adelante" title="Paso adelante (→)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button type="button" class="btn" id="bFin" aria-label="Ir al final" title="Ir al final (Fin)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14"/><path d="M6 6l9 6-9 6z"/></svg>
+      </button>
+    </div>
+    <div class="grupo velocidad">
+      <label class="etq" for="vel">Velocidad</label>
+      <input class="vel-range" type="range" id="vel" min="0" max="4" value="2" step="1">
+      <output id="velOut" for="vel" class="mono">1×</output>
+    </div>
+    <div class="progreso">
+      <label for="scrub" class="sr-only">Ir a un paso</label>
+      <input type="range" id="scrub" min="0" max="1" value="0">
+      <span id="pasoTxt" class="mono">1 / 1</span>
+    </div>
+  </section>
+
+  <section class="tarjeta estado" aria-label="Qué está pasando">
+    <ol class="fases" id="fases">
+      <li data-fase="inicio">Inicio</li>
+      <li data-fase="llamadas">Llamadas (bajando)</li>
+      <li data-fase="base">Caso base</li>
+      <li data-fase="retornos">Retornos (subiendo)</li>
+      <li data-fase="fin">Fin</li>
+      <li data-fase="so" class="oculta">StackOverflowError</li>
+    </ol>
+    <p class="msg" id="msg" aria-live="polite"></p>
+  </section>
+
+  <div class="aviso-caso arith" id="avisoArith" role="note" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+    <p><strong>Desbordamiento aritmético</strong>Un <code id="avisoTipo">int</code> solo guarda valores hasta <span id="avisoMax" class="mono">2.147.483.647</span>. Si una multiplicación se pasa, Java <b>no lanza ningún error</b>: se queda con los bits que caben y el resultado sale mal (incluso negativo o 0). Con <code>int</code> ocurre a partir de <code>13!</code> y con <code>long</code> a partir de <code>21!</code>; para valores mayores harían falta <code>BigInteger</code>.</p>
+  </div>
+  <div class="aviso-caso so" id="avisoSO" role="note" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+    <p><strong>StackOverflowError</strong>Cada llamada que todavía no ha terminado ocupa un marco en la pila. Si hay demasiadas llamadas pendientes a la vez, la pila se llena y la JVM lanza <code>StackOverflowError</code>: el programa termina sin resultado. No depende del tipo (<code>int</code> o <code>long</code>), sino del número de llamadas encadenadas. Aquí la pila es muy pequeña para poder verlo; en una JVM real caben miles de marcos (depende de <code>-Xss</code>).</p>
+  </div>
+
+  <div class="rejilla" id="rejilla">
+    <section class="tarjeta panel panel-codigo" aria-labelledby="hCodigo">
+      <h2 id="hCodigo">Código</h2>
+      <pre class="codigo" id="codigo"></pre>
+    </section>
+
+    <section class="tarjeta panel panel-pila" aria-labelledby="hPila">
+      <h2 id="hPila">Pila de llamadas (stack) · memoria</h2>
+      <div class="mem-cab"><span>Ocupación</span><strong id="memTxt">0 / 25 marcos</strong></div>
+      <div class="celdas ok" id="celdas" aria-hidden="true"></div>
+      <p class="mem-nota" id="memNota"></p>
+      <div class="marcos-caja">
+        <ol class="marcos" id="marcos" aria-label="Marcos en la pila, el de arriba es el activo"></ol>
+        <div class="marco principal" id="marcoMain"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta panel panel-arbol" aria-labelledby="hArbol" id="panelArbol" hidden>
+      <h2 id="hArbol">Árbol de llamadas</h2>
+      <div class="arbol-caja" id="arbol"></div>
+      <p class="leyenda">En azul, el camino desde <code>main</code> hasta la llamada activa: son justo los marcos que hay ahora en la pila. En verde, las llamadas que ya han terminado con su resultado.</p>
+    </section>
+
+    <section class="tarjeta panel panel-consola" aria-labelledby="hConsola">
+      <h2 id="hConsola">Consola</h2>
+      <pre class="salida" id="salida" aria-live="off"></pre>
+      <div class="resultado" id="resultado" hidden></div>
+    </section>
+  </div>
+
+  <p class="pie">Atajos: <kbd>←</kbd> <kbd>→</kbd> paso a paso · <kbd>Espacio</kbd> reproducir/pausa · <kbd>Inicio</kbd> <kbd>Fin</kbd><br>
+  Material de apoyo de <a href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">Programación 1º DAM</a> · © David Martínez Peña · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const LIMITES = {
+    int:  { bits: 32, max: 2147483647n },
+    long: { bits: 64, max: 9223372036854775807n }
+  };
+  const VELOCIDADES = [0.25, 0.5, 1, 2, 4];
+  const RETARDO_BASE = 1100; // ms por paso a 1×
+  const ALG = {
+    factorial: {
+      nMax: 100, nSlider: 60, nInicial: 4,
+      casos: [['4,int', 'n = 4 (apuntes)'], ['12,int', 'int con n = 12'], ['13,int', 'int con n = 13 (desborda)'],
+              ['21,long', 'long con n = 21 (desborda)'], ['40,long', 'n = 40 (pila llena)']]
+    },
+    fibonacci: {
+      nMax: 8, nSlider: 8, nInicial: 5,
+      casos: [['3,int', 'fibonacci(3)'], ['4,int', 'fibonacci(4)'], ['5,int', 'fibonacci(5)'], ['6,int', 'fibonacci(6)']]
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const c = (s) => '<code>' + s + '</code>';
+
+  /* ---------- Código mostrado (los números de línea se usan en los pasos) ---------- */
+  function lineasCodigo(alg, N, tipo) {
+    if (alg === 'fibonacci') {
+      return [
+        'public class Recursividad {',
+        '',
+        '  public static void main(String[] args) {',
+        '    System.out.println(fibonacci(' + N + '));',
+        '  }',
+        '',
+        '  public static int fibonacci(int n) {',
+        '    if (n <= 1) {',
+        '      System.out.println("Caso base: fibonacci(" + n + ") = " + n);',
+        '      return n;',
+        '    } else {',
+        '      int a = fibonacci(n - 1);',
+        '      int b = fibonacci(n - 2);',
+        '      System.out.println("fibonacci(" + n + ") = " + a + " + " + b);',
+        '      return a + b;',
+        '    }',
+        '  }',
+        '}'
+      ];
+    }
+    return [
+      'public class Recursividad {',
+      '',
+      '  public static void main(String[] args) {',
+      '    System.out.println(factorial(' + N + '));',
+      '  }',
+      '',
+      '  public static ' + tipo + ' factorial(int n) {',
+      '    if (n == 0) {',
+      '      System.out.println("Caso base: n es igual a 0");',
+      '      return 1;',
+      '    } else {',
+      '      System.out.println("Caso recursivo " + (n - 1)',
+      '          + ": Se invoca al factorial(" + (n - 1) + ")");',
+      '      ' + tipo + ' res = n * factorial(n - 1);',
+      '      System.out.println("  cuyo resultado es: " + res);',
+      '      return res;',
+      '    }',
+      '  }',
+      '}'
+    ];
+  }
+
+  function escapar(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function resaltar(linea) {
+    const re = /("(?:[^"\\]|\\.)*")|\b(public|static|void|class|int|long|if|else|return|String)\b|\b(\d+)\b/g;
+    let out = '', ult = 0, m;
+    while ((m = re.exec(linea)) !== null) {
+      out += escapar(linea.slice(ult, m.index));
+      const cls = m[1] ? 'str' : m[2] ? 'kw' : 'n';
+      out += '<span class="' + cls + '">' + escapar(m[0]) + '</span>';
+      ult = re.lastIndex;
+    }
+    return out + escapar(linea.slice(ult));
+  }
+
+  function trazaSO(consola, metodo, linea, limite) {
+    consola.push({ t: 'Exception in thread "main" java.lang.StackOverflowError', cls: 'err' });
+    for (let i = 0; i < 3; i++) consola.push({ t: '    at Recursividad.' + metodo + '(Recursividad.java:' + linea + ')', cls: 'err' });
+    consola.push({ t: '    ... (' + (limite - 3) + ' líneas más)', cls: 'err' });
+    consola.push({ t: '    at Recursividad.main(Recursividad.java:4)', cls: 'err' });
+  }
+
+  /* ---------- factorial: genera todos los pasos de antemano ---------- */
+  function generarFactorial(N, tipo, limite) {
+    const { bits, max } = LIMITES[tipo];
+    const pasos = [];
+    const marcos = [];   // {titulo, n, res, estado, tag, alerta, vuelve}
+    const consola = [];  // {t, cls}
+    let mainEstado = { tag: 'ejecutando', texto: 'llama a factorial(' + N + ')' };
+    let huboArith = false; // a partir del primer desbordamiento aritmético se muestra su explicación
+
+    function foto(p) {
+      pasos.push(Object.assign({
+        marcos: marcos.map((m) => Object.assign({}, m)),
+        consola: consola.slice(),
+        main: Object.assign({}, mainEstado),
+        nuevo: -1, recibe: -1, fantasma: null, resultado: null, huboArith: huboArith
+      }, p));
+    }
+    function enEspera() {
+      marcos.forEach((m) => {
+        if (m.estado === 'arith') m.tag = 'desbordado · en espera';
+        else if (m.estado === 'erroneo') m.tag = 'en espera';
+        else { m.estado = 'espera'; m.tag = 'en espera'; }
+      });
+    }
+    const varsDe = (m) => 'n = <span class="val">' + m.n + '</span>' +
+      (m.n === 0 ? '' : '</span><span>res = <span class="val">' + (m.res === null ? '?' : m.res) + '</span>');
+
+    foto({ lineas: [4], fase: 'inicio',
+      msg: 'El programa empieza en ' + c('main') + ', que va a llamar a ' + c('factorial(' + N + ')') + '. Pulsa <b>Paso adelante</b> o <b>Reproducir</b>.' });
+
+    // Fase de llamadas (la pila crece)
+    for (let k = N; k >= 0; k--) {
+      enEspera();
+      if (k === N) mainEstado = { tag: 'en espera', texto: 'espera el resultado de factorial(' + N + ')' };
+      if (marcos.length >= limite) {
+        trazaSO(consola, 'factorial', 14, limite);
+        mainEstado = { tag: 'abortado', texto: 'el programa termina por la excepción' };
+        foto({ lineas: [14], fase: 'so', fantasma: 'factorial(n = ' + k + ')', desborde: true,
+          msg: '<span class="marca-so">¡Pila llena!</span> No cabe el marco de ' + c('factorial(' + k + ')') + ': ya hay ' + limite +
+               ' llamadas pendientes. La JVM lanza <b>StackOverflowError</b> y el programa termina.',
+          resultado: { so: true } });
+        return { pasos: pasos, arbol: null };
+      }
+      const m = { titulo: 'factorial(n = ' + k + ')', n: k, res: null, estado: 'activo', tag: 'ejecutando', alerta: null,
+                  vuelve: k === N ? 'main, línea 4' : 'línea 14' };
+      m.vars = varsDe(m);
+      marcos.push(m);
+      const llamador = k === N ? 'main' : 'factorial(' + (k + 1) + ')';
+      foto({ lineas: [7], fase: 'llamadas', nuevo: marcos.length - 1,
+        msg: c(llamador) + ' llama a ' + c('factorial(' + k + ')') + '. Se apila un marco nuevo con su parámetro ' + c('n = ' + k) +
+             (marcos.length > 1 ? '; los ' + (marcos.length - 1) + ' marcos anteriores siguen ocupando memoria.' : '.') });
+      if (k === 0) {
+        foto({ lineas: [8], fase: 'base', msg: '¿' + c('n == 0') + '? <b>Sí</b>: es el <b>caso base</b>, la respuesta se conoce sin volver a llamar al método.' });
+        consola.push({ t: 'Caso base: n es igual a 0' });
+        foto({ lineas: [9], fase: 'base', msg: 'Se imprime el mensaje del caso base.' });
+        const top = marcos[marcos.length - 1];
+        top.estado = 'base'; top.tag = 'devuelve 1';
+        foto({ lineas: [10], fase: 'base', msg: c('return 1') + ': el caso base devuelve 1 sin hacer ninguna llamada más. A partir de aquí la pila empieza a <b>vaciarse</b>.' });
+      } else {
+        foto({ lineas: [8], fase: 'llamadas', msg: '¿' + c('n == 0') + '? <b>No</b> (n vale ' + k + '): es un <b>caso recursivo</b>.' });
+        consola.push({ t: 'Caso recursivo ' + (k - 1) + ': Se invoca al factorial(' + (k - 1) + ')' });
+        foto({ lineas: [12, 13], fase: 'llamadas', msg: 'Se imprime qué llamada se va a hacer.' });
+        foto({ lineas: [14], fase: 'llamadas',
+          msg: 'Para calcular ' + c('res') + ' hace falta ' + c('factorial(' + (k - 1) + ')') + '. La ejecución de ' + c('factorial(' + k + ')') + ' se queda <b>en espera</b> en la línea 14 y su marco sigue en la pila.' });
+      }
+    }
+
+    // Fase de retornos (la pila decrece)
+    let java = 1n, real = 1n;
+    for (let k = 1; k <= N; k++) {
+      marcos.pop();
+      const top = marcos[marcos.length - 1];
+      const previo = java;
+      const prod = BigInt(k) * previo;
+      java = BigInt.asIntN(bits, prod);
+      real *= BigInt(k);
+      const desborda = prod !== java;
+      const erroneo = java !== real;
+      top.res = String(java); top.vars = varsDe(top);
+      let msg;
+      if (desborda) {
+        huboArith = true;
+        top.estado = 'arith'; top.tag = 'desbordado';
+        top.alerta = 'Desbordamiento: el valor real sería <span class="mono">' + real + '</span>';
+        msg = c('factorial(' + (k - 1) + ')') + ' ha devuelto ' + previo + '. Pero ' + c(k + ' * ' + previo + ' = ' + prod) + ' ' +
+              '<span class="marca-arith">no cabe en un ' + tipo + '</span> (máximo ' + max + '). Java no avisa: se queda con los bits que caben y ' + c('res') + ' vale <b>' + java + '</b>.';
+      } else if (erroneo) {
+        top.estado = 'erroneo'; top.tag = 'valor erróneo';
+        top.alerta = 'Arrastra el error: el valor real sería <span class="mono">' + real + '</span>';
+        msg = c('factorial(' + (k - 1) + ')') + ' ha devuelto ' + previo + ', que ya era incorrecto. ' + c('res = ' + java) +
+              ', pero <span class="marca-arith">arrastra el error</span>: el valor real de ' + k + '! es ' + real + '.';
+      } else {
+        top.estado = 'activo'; top.tag = 'ejecutando';
+        msg = c('factorial(' + (k - 1) + ')') + ' ha devuelto <b>' + previo + '</b> y su marco se ha liberado. Ya se puede terminar la línea 14: ' + c('res = ' + k + ' * ' + previo + ' = ' + java) + '.';
+      }
+      foto({ lineas: [14], fase: 'retornos', recibe: marcos.length - 1, msg: msg });
+      consola.push({ t: '  cuyo resultado es: ' + java });
+      foto({ lineas: [15], fase: 'retornos', msg: 'Se imprime el resultado parcial de ' + c('factorial(' + k + ')') + '.' });
+      if (!desborda && !erroneo) top.estado = 'devuelve';
+      top.tag = 'devuelve ' + java;
+      foto({ lineas: [16], fase: 'retornos',
+        msg: c('return res') + ': devuelve ' + java + ' a ' + c(k === N ? 'main' : 'factorial(' + (k + 1) + ')') + ' y su marco se liberará.' });
+    }
+
+    marcos.pop();
+    consola.push({ t: String(java) });
+    const ok = java === real;
+    mainEstado = { tag: 'terminado', texto: 'ha recibido ' + java + ' y lo ha impreso' };
+    foto({ lineas: [4], fase: 'fin', resultado: { java: String(java), real: String(real), ok: ok, n: N, tipo: tipo },
+      msg: ok
+        ? c('main') + ' recibe <b>' + java + '</b> y lo imprime. Todos los marcos de ' + c('factorial') + ' se han liberado: la pila vuelve a estar vacía.'
+        : c('main') + ' imprime <b>' + java + '</b>, pero ' + N + '! vale realmente ' + real + '. <span class="marca-arith">El tipo ' + tipo + ' se ha desbordado sin avisar.</span>' });
+    return { pasos: pasos, arbol: null };
+  }
+
+  /* ---------- fibonacci: árbol con posiciones fijas (ids en orden de llamada) ---------- */
+  function arbolFib(N) {
+    const nodos = [];
+    const SEP = 52, NIVEL = 58, MARGEN = 30;
+    let hoja = 0;
+    function crear(n, prof, padre) {
+      const nodo = { id: nodos.length, n: n, padre: padre, x: 0, y: MARGEN + prof * NIVEL, prof: prof };
+      nodos.push(nodo);
+      if (n <= 1) { nodo.x = MARGEN + hoja * SEP; hoja++; }
+      else {
+        const a = crear(n - 1, prof + 1, nodo.id);
+        const b = crear(n - 2, prof + 1, nodo.id);
+        nodo.x = (nodos[a].x + nodos[b].x) / 2;
+      }
+      return nodo.id;
+    }
+    crear(N, 0, -1);
+    const prof = Math.max.apply(null, nodos.map((d) => d.prof));
+    return { nodos: nodos, w: MARGEN * 2 + (hoja - 1) * SEP, h: MARGEN * 2 + prof * NIVEL + 16 };
+  }
+
+  function generarFibonacci(N, limite) {
+    const arbol = arbolFib(N);
+    const estados = arbol.nodos.map(() => 'oculto');
+    const valores = arbol.nodos.map(() => '');
+    const pasos = [], marcos = [], consola = [];
+    let mainEstado = { tag: 'ejecutando', texto: 'llama a fibonacci(' + N + ')' };
+    let siguiente = 0, maxProf = 0, llamadas = 0;
+    const ABORTA = {};
+
+    function foto(p) {
+      pasos.push(Object.assign({
+        marcos: marcos.map((m) => Object.assign({}, m)),
+        consola: consola.slice(),
+        main: Object.assign({}, mainEstado),
+        nuevo: -1, recibe: -1, fantasma: null, resultado: null, huboArith: false,
+        nodos: estados.slice(), valores: valores.slice(), nodoNuevo: -1
+      }, p));
+    }
+    function todosEnEspera() {
+      marcos.forEach((m) => { m.estado = 'espera'; m.tag = 'en espera'; estados[m.id] = 'espera'; });
+    }
+    const varsDe = (m) => 'n = <span class="val">' + m.n + '</span>' + (m.n <= 1 ? '' :
+      '</span><span>a = <span class="val">' + (m.a === null ? '?' : m.a) + '</span></span><span>b = <span class="val">' + (m.b === null ? '?' : m.b) + '</span>');
+
+    function visita(n, llamador, vuelve) {
+      const id = siguiente++;
+      todosEnEspera();
+      if (marcos.length >= limite) {
+        trazaSO(consola, 'fibonacci', vuelve === 'línea 13' ? 13 : 12, limite);
+        mainEstado = { tag: 'abortado', texto: 'el programa termina por la excepción' };
+        estados[id] = 'fantasma';
+        foto({ lineas: [vuelve === 'línea 13' ? 13 : 12], fase: 'so', fantasma: 'fibonacci(n = ' + n + ')', desborde: true, nodoNuevo: id,
+          msg: '<span class="marca-so">¡Pila llena!</span> No cabe el marco de ' + c('fibonacci(' + n + ')') + ': ya hay ' + limite +
+               ' llamadas pendientes. La JVM lanza <b>StackOverflowError</b> y el programa termina.',
+          resultado: { so: true } });
+        throw ABORTA;
+      }
+      llamadas++;
+      const m = { id: id, titulo: 'fibonacci(n = ' + n + ')', n: n, a: null, b: null, estado: 'activo', tag: 'ejecutando', alerta: null, vuelve: vuelve };
+      m.vars = varsDe(m);
+      marcos.push(m);
+      maxProf = Math.max(maxProf, marcos.length);
+      estados[id] = 'activo';
+      foto({ lineas: [7], fase: 'llamadas', nuevo: marcos.length - 1, nodoNuevo: id,
+        msg: c(llamador) + ' llama a ' + c('fibonacci(' + n + ')') + '. Se apila un marco nuevo con ' + c('n = ' + n) + '; ahora hay ' +
+             marcos.length + (marcos.length === 1 ? ' marco' : ' marcos') + ' de ' + c('fibonacci') + ' en la pila.' });
+      if (n <= 1) {
+        foto({ lineas: [8], fase: 'base', msg: '¿' + c('n <= 1') + '? <b>Sí</b>: es un <b>caso base</b>. ' + c('fibonacci(' + n + ')') + ' vale ' + n + ' sin hacer más llamadas.' });
+        consola.push({ t: 'Caso base: fibonacci(' + n + ') = ' + n });
+        foto({ lineas: [9], fase: 'base', msg: 'Se imprime el mensaje del caso base.' });
+        m.estado = 'base'; m.tag = 'devuelve ' + n;
+        foto({ lineas: [10], fase: 'base', msg: c('return n') + ': devuelve ' + n + ' a quien lo llamó y su marco se libera.' });
+        marcos.pop();
+        estados[id] = 'hecho'; valores[id] = String(n);
+        return n;
+      }
+      foto({ lineas: [8], fase: 'llamadas',
+        msg: '¿' + c('n <= 1') + '? <b>No</b> (n vale ' + n + '): caso recursivo. Hacen falta <b>dos llamadas</b>: ' + c('fibonacci(' + (n - 1) + ')') + ' y ' + c('fibonacci(' + (n - 2) + ')') + '.' });
+      foto({ lineas: [12], fase: 'llamadas',
+        msg: '<b>Primera llamada</b>: ' + c('fibonacci(' + (n - 1) + ')') + '. ' + c('fibonacci(' + n + ')') + ' queda en espera en la línea 12 hasta que termine <b>toda esa rama</b>.' });
+      const a = visita(n - 1, 'fibonacci(' + n + ')', 'línea 12');
+      todosEnEspera();
+      m.estado = 'activo'; m.tag = 'ejecutando'; estados[id] = 'activo';
+      m.a = a; m.vars = varsDe(m);
+      foto({ lineas: [12], fase: 'retornos', recibe: marcos.length - 1,
+        msg: c('fibonacci(' + (n - 1) + ')') + ' ha devuelto ' + a + ', así que ' + c('a = ' + a) + '. Todos los marcos de esa rama ya se han liberado.' });
+      foto({ lineas: [13], fase: 'llamadas',
+        msg: '<b>Segunda llamada</b>: ' + c('fibonacci(' + (n - 2) + ')') + '. La pila <b>vuelve a crecer</b>; ' + c('fibonacci(' + n + ')') + ' espera ahora en la línea 13.' });
+      const b = visita(n - 2, 'fibonacci(' + n + ')', 'línea 13');
+      todosEnEspera();
+      m.estado = 'activo'; m.tag = 'ejecutando'; estados[id] = 'activo';
+      m.b = b; m.vars = varsDe(m);
+      foto({ lineas: [13], fase: 'retornos', recibe: marcos.length - 1,
+        msg: c('fibonacci(' + (n - 2) + ')') + ' ha devuelto ' + b + ', así que ' + c('b = ' + b) + '. Ya se tienen los dos resultados.' });
+      consola.push({ t: 'fibonacci(' + n + ') = ' + a + ' + ' + b });
+      foto({ lineas: [14], fase: 'retornos', msg: 'Se imprime la suma de los dos resultados.' });
+      m.estado = 'devuelve'; m.tag = 'devuelve ' + (a + b);
+      foto({ lineas: [15], fase: 'retornos',
+        msg: c('return a + b') + ': devuelve ' + (a + b) + ' a ' + c(marcos.length === 1 ? 'main' : 'fibonacci(' + marcos[marcos.length - 2].n + ')') + ' y su marco se libera.' });
+      marcos.pop();
+      estados[id] = 'hecho'; valores[id] = String(a + b);
+      return a + b;
+    }
+
+    foto({ lineas: [4], fase: 'inicio',
+      msg: 'El programa empieza en ' + c('main') + ', que va a llamar a ' + c('fibonacci(' + N + ')') + '. Pulsa <b>Paso adelante</b> o <b>Reproducir</b>.' });
+    mainEstado = { tag: 'en espera', texto: 'espera el resultado de fibonacci(' + N + ')' };
+    try {
+      const r = visita(N, 'main', 'main, línea 4');
+      consola.push({ t: String(r) });
+      mainEstado = { tag: 'terminado', texto: 'ha recibido ' + r + ' y lo ha impreso' };
+      foto({ lineas: [4], fase: 'fin', resultado: { fib: true, n: N, java: String(r) },
+        msg: llamadas === 1
+          ? c('main') + ' recibe <b>' + r + '</b> y lo imprime. Es un caso base: basta con una sola llamada.'
+          : c('main') + ' recibe <b>' + r + '</b> y lo imprime. Se han hecho <b>' + llamadas + ' llamadas</b>, pero en la pila nunca hubo más de <b>' + maxProf + ' marcos</b> de ' + c('fibonacci') + ' a la vez.' });
+    } catch (e) {
+      if (e !== ABORTA) throw e;
+    }
+    return { pasos: pasos, arbol: arbol };
+  }
+
+  /* ---------- Estado de la interfaz ---------- */
+  const st = { alg: 'factorial', N: 4, tipo: 'int', limite: 25, pasos: [], arbol: null, i: 0, play: false, vel: 2, timer: null, codigo: [] };
+
+  function reconstruir() {
+    parar();
+    const d = st.alg === 'fibonacci' ? generarFibonacci(st.N, st.limite) : generarFactorial(st.N, st.tipo, st.limite);
+    st.pasos = d.pasos;
+    st.arbol = d.arbol;
+    st.codigo = lineasCodigo(st.alg, st.N, st.tipo);
+    st.i = 0;
+    $('scrub').max = st.pasos.length - 1;
+    construirCeldas();
+    pintar();
+  }
+
+  function construirCeldas() {
+    const cel = $('celdas');
+    cel.style.gridTemplateColumns = 'repeat(' + st.limite + ', minmax(0, 1fr))';
+    cel.innerHTML = '<span class="celda"></span>'.repeat(st.limite);
+  }
+
+  function pintarArbol(p) {
+    const A = st.arbol;
+    const visible = (id) => p.nodos[id] !== 'oculto';
+    const enPila = (id) => p.nodos[id] === 'activo' || p.nodos[id] === 'espera';
+    let svg = '<svg width="' + A.w + '" height="' + A.h + '" viewBox="0 0 ' + A.w + ' ' + A.h + '" role="img" aria-label="Árbol de llamadas de fibonacci">';
+    A.nodos.forEach((nd) => {
+      if (nd.padre < 0 || !visible(nd.id)) return;
+      const pa = A.nodos[nd.padre];
+      svg += '<line class="arista' + (enPila(nd.id) ? ' pila' : '') + '" x1="' + pa.x + '" y1="' + (pa.y + 12) + '" x2="' + nd.x + '" y2="' + (nd.y - 12) + '"/>';
+    });
+    A.nodos.forEach((nd) => {
+      if (!visible(nd.id)) return;
+      const val = p.valores[nd.id];
+      svg += '<g class="nodo ' + p.nodos[nd.id] + (nd.id === p.nodoNuevo ? ' entra' : '') + '">' +
+        '<rect x="' + (nd.x - 22) + '" y="' + (nd.y - 12) + '" width="44" height="24" rx="6"/>' +
+        '<text class="lbl" x="' + nd.x + '" y="' + (nd.y + 4) + '" text-anchor="middle">f(' + nd.n + ')</text>' +
+        (val ? '<text class="val" x="' + nd.x + '" y="' + (nd.y + 27) + '" text-anchor="middle">= ' + val + '</text>' : '') +
+        '</g>';
+    });
+    $('arbol').innerHTML = svg + '</svg>';
+  }
+
+  function pintar() {
+    const p = st.pasos[st.i];
+    const total = st.pasos.length;
+    const metodo = st.alg;
+
+    // Código
+    $('codigo').innerHTML = st.codigo.map((l, idx) => {
+      const n = idx + 1;
+      const act = p.lineas.indexOf(n) !== -1 ? ' actual' : '';
+      return '<span class="ln' + act + '"><span class="num">' + n + '</span><span class="txt">' + resaltar(l) + '</span></span>';
+    }).join('');
+
+    // Fase: solo se muestra la etiqueta de la fase actual
+    const esSO = p.fase === 'so';
+    document.querySelectorAll('#fases li').forEach((li) => {
+      const f = li.dataset.fase;
+      li.className = f !== p.fase ? 'oculta' : esSO ? 'so' : 'actual';
+    });
+    $('msg').innerHTML = p.msg;
+
+    // Avisos contextuales: solo cuando ocurre cada caso
+    $('avisoArith').hidden = !p.huboArith;
+    $('avisoSO').hidden = !esSO;
+    $('avisoTipo').textContent = st.tipo;
+    $('avisoMax').textContent = st.tipo === 'int' ? '2.147.483.647' : '9.223.372.036.854.775.807';
+
+    // Memoria
+    const usados = p.marcos.length;
+    const ratio = usados / st.limite;
+    const celdas = $('celdas');
+    celdas.className = 'celdas ' + (p.desborde ? 'desborde' : ratio < 0.6 ? 'ok' : ratio < 0.85 ? 'aviso' : 'peligro');
+    Array.prototype.forEach.call(celdas.children, (cel, j) => { cel.className = 'celda' + (j < usados ? ' llena' : ''); });
+    $('memTxt').textContent = (p.desborde ? usados + 1 : usados) + ' / ' + st.limite + ' marcos';
+    const nota = $('memNota');
+    if (p.desborde) {
+      nota.className = 'mem-nota desborde';
+      nota.textContent = 'No cabe ni un marco más: StackOverflowError.';
+    } else {
+      nota.className = 'mem-nota';
+      nota.innerHTML = usados === 0
+        ? 'Cada llamada a ' + c(metodo) + ' reserva un marco con sus variables.'
+        : Math.round(ratio * 100) + ' % de la pila ocupada.';
+    }
+
+    // Marcos (el de arriba de la lista es la cima de la pila)
+    let lis = '';
+    if (p.fantasma !== null) {
+      lis += '<li class="marco fantasma entra"><div class="m-cab"><code>' + p.fantasma + '</code><span class="m-tag">no cabe</span></div>' +
+             '<div class="m-vars">StackOverflowError</div></li>';
+    }
+    for (let j = p.marcos.length - 1; j >= 0; j--) {
+      const m = p.marcos[j];
+      const vars = j === p.recibe ? m.vars.replace(/class="val">([^<?]+)<\/span>(?![\s\S]*class="val">[^<?]+<\/span>)/, 'class="val recibe">$1</span>') : m.vars;
+      lis += '<li class="marco ' + m.estado + (j === p.nuevo ? ' entra' : '') + '">' +
+        '<div class="m-cab"><code>' + m.titulo + '</code><span class="m-tag">' + m.tag + '</span></div>' +
+        '<div class="m-vars"><span>' + vars + '</span><span>vuelve a: ' + m.vuelve + '</span></div>' +
+        (m.alerta ? '<div class="m-alerta">' + m.alerta + '</div>' : '') +
+        '</li>';
+    }
+    $('marcos').innerHTML = lis || '<li class="pila-vacia">Sin marcos de ' + c(metodo) + ' en la pila (stack)</li>';
+    $('marcoMain').innerHTML = '<div class="m-cab"><code>main(args)</code><span class="m-tag">' + p.main.tag + '</span></div>' +
+      '<div class="m-vars"><span>' + p.main.texto + '</span></div>';
+
+    // Árbol (solo fibonacci)
+    if (st.arbol) pintarArbol(p);
+
+    // Consola
+    const sal = $('salida');
+    if (p.consola.length === 0) {
+      sal.innerHTML = '<span class="vacia">(la salida del programa aparecerá aquí)</span>';
+    } else {
+      const prev = st.i > 0 ? st.pasos[st.i - 1].consola.length : 0;
+      sal.innerHTML = p.consola.map((l, j) => {
+        const cls = [l.cls || '', j >= prev && st.i > 0 && !l.cls ? 'nueva' : ''].join(' ').trim();
+        return '<span' + (cls ? ' class="' + cls + '"' : '') + '>' + escapar(l.t) + '</span>';
+      }).join('\n');
+      sal.scrollTop = sal.scrollHeight;
+    }
+
+    // Resultado
+    const r = $('resultado');
+    const R = p.resultado;
+    if (!R) {
+      r.hidden = true;
+    } else {
+      r.hidden = false;
+      if (R.so) {
+        r.className = 'resultado so';
+        r.innerHTML = '<strong>Sin resultado: StackOverflowError</strong>Prueba un n menor o aumenta el tamaño de la pila.';
+      } else if (R.fib) {
+        r.className = 'resultado ok';
+        r.innerHTML = '<strong>fibonacci(' + R.n + ') = ' + R.java + '</strong>';
+      } else {
+        r.className = 'resultado ' + (R.ok ? 'ok' : 'mal');
+        r.innerHTML = '<strong>' + (R.ok ? 'Resultado correcto' : 'Resultado incorrecto: desbordamiento de ' + R.tipo) + '</strong>' +
+          '<dl><dt>Java imprime</dt><dd>' + R.java + '</dd><dt>Valor real de ' + R.n + '!</dt><dd>' + R.real + '</dd></dl>';
+      }
+    }
+
+    // Controles
+    $('scrub').value = st.i;
+    $('pasoTxt').textContent = (st.i + 1) + ' / ' + total;
+    $('bInicio').disabled = st.i === 0;
+    $('bAtras').disabled = st.i === 0;
+    $('bAdelante').disabled = st.i === total - 1;
+    $('bFin').disabled = st.i === total - 1;
+  }
+
+  /* ---------- Reproducción ---------- */
+  function ir(i) {
+    st.i = Math.max(0, Math.min(st.pasos.length - 1, i));
+    pintar();
+  }
+  function actualizarBotonPlay() {
+    $('icoPlay').hidden = st.play;
+    $('icoPausa').hidden = !st.play;
+    $('txtPlay').textContent = st.play ? 'Pausa' : 'Reproducir';
+  }
+  function programar() {
+    clearTimeout(st.timer);
+    if (!st.play) return;
+    st.timer = setTimeout(() => {
+      if (st.i >= st.pasos.length - 1) { parar(); return; }
+      ir(st.i + 1);
+      if (st.i >= st.pasos.length - 1) parar(); else programar();
+    }, RETARDO_BASE / VELOCIDADES[st.vel]);
+  }
+  function reproducir() {
+    if (st.i >= st.pasos.length - 1) ir(0);
+    st.play = true; actualizarBotonPlay(); programar();
+  }
+  function parar() {
+    st.play = false; clearTimeout(st.timer); actualizarBotonPlay();
+  }
+  function alternar() { st.play ? parar() : reproducir(); }
+
+  /* ---------- Eventos ---------- */
+  function entero(v, min, max, def) {
+    const n = parseInt(v, 10);
+    if (isNaN(n)) return def;
+    return Math.max(min, Math.min(max, n));
+  }
+  function sincronizarN() {
+    const cfg = ALG[st.alg];
+    $('nNum').max = cfg.nMax;
+    $('nRange').max = cfg.nSlider;
+    $('nNum').value = st.N;
+    $('nRange').value = Math.min(st.N, cfg.nSlider);
+  }
+  function fijarN(v) {
+    st.N = entero(v, 0, ALG[st.alg].nMax, st.N);
+    sincronizarN();
+    reconstruir();
+  }
+  function marcarTipo() {
+    $('tInt').setAttribute('aria-pressed', st.tipo === 'int');
+    $('tLong').setAttribute('aria-pressed', st.tipo === 'long');
+  }
+  function marcarAlg() {
+    const fib = st.alg === 'fibonacci';
+    $('aFact').setAttribute('aria-pressed', !fib);
+    $('aFib').setAttribute('aria-pressed', fib);
+    $('titulo').textContent = st.alg + '(n)';
+    $('segTipo').hidden = fib;
+    $('panelArbol').hidden = !fib;
+    $('rejilla').classList.toggle('con-arbol', fib);
+    $('casos').innerHTML = '<option value="">Casos de ejemplo…</option>' +
+      ALG[st.alg].casos.map((k) => '<option value="' + k[0] + '">' + k[1] + '</option>').join('');
+    sincronizarN();
+  }
+  function fijarAlg(alg) {
+    if (alg === st.alg) return;
+    st.alg = alg;
+    st.N = ALG[alg].nInicial;
+    if (alg === 'fibonacci') { st.tipo = 'int'; marcarTipo(); }
+    marcarAlg();
+    reconstruir();
+  }
+
+  $('aFact').addEventListener('click', () => fijarAlg('factorial'));
+  $('aFib').addEventListener('click', () => fijarAlg('fibonacci'));
+  $('nRange').addEventListener('input', (e) => fijarN(e.target.value));
+  $('nNum').addEventListener('change', (e) => fijarN(e.target.value));
+  $('tInt').addEventListener('click', () => { st.tipo = 'int'; marcarTipo(); reconstruir(); });
+  $('tLong').addEventListener('click', () => { st.tipo = 'long'; marcarTipo(); reconstruir(); });
+  $('limite').addEventListener('change', (e) => { st.limite = entero(e.target.value, 3, 60, st.limite); e.target.value = st.limite; reconstruir(); });
+  $('casos').addEventListener('change', (e) => {
+    if (!e.target.value) return;
+    const partes = e.target.value.split(',');
+    e.target.value = '';
+    st.tipo = partes[1]; marcarTipo();
+    st.limite = 25; $('limite').value = st.limite;
+    fijarN(partes[0]);
+  });
+
+  // Tema claro/oscuro: por defecto el del sistema; la elección se recuerda en este navegador
+  const raiz = document.documentElement;
+  function esOscuro() {
+    const t = raiz.getAttribute('data-theme');
+    return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function marcarTema() {
+    const o = esOscuro();
+    $('icoLuna').hidden = o; $('icoSol').hidden = !o;
+    $('txtTema').textContent = o ? 'Tema claro' : 'Tema oscuro';
+    $('bTema').setAttribute('aria-label', o ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+  }
+  try { const g = localStorage.getItem('1dam-tema'); if (g === 'dark' || g === 'light') raiz.setAttribute('data-theme', g); } catch (err) { /* sin almacenamiento */ }
+  $('bTema').addEventListener('click', () => {
+    const nuevo = esOscuro() ? 'light' : 'dark';
+    raiz.setAttribute('data-theme', nuevo);
+    try { localStorage.setItem('1dam-tema', nuevo); } catch (err) { /* sin almacenamiento */ }
+    marcarTema();
+  });
+  marcarTema();
+
+  $('bInicio').addEventListener('click', () => { parar(); ir(0); });
+  $('bAtras').addEventListener('click', () => { parar(); ir(st.i - 1); });
+  $('bAdelante').addEventListener('click', () => { parar(); ir(st.i + 1); });
+  $('bFin').addEventListener('click', () => { parar(); ir(st.pasos.length - 1); });
+  $('bPlay').addEventListener('click', alternar);
+  $('scrub').addEventListener('input', (e) => { parar(); ir(parseInt(e.target.value, 10)); });
+  $('vel').addEventListener('input', (e) => {
+    st.vel = parseInt(e.target.value, 10);
+    $('velOut').textContent = String(VELOCIDADES[st.vel]).replace('.', ',') + '×';
+    programar();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowRight') { parar(); ir(st.i + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft') { parar(); ir(st.i - 1); e.preventDefault(); }
+    else if (e.key === 'Home') { parar(); ir(0); e.preventDefault(); }
+    else if (e.key === 'End') { parar(); ir(st.pasos.length - 1); e.preventDefault(); }
+    else if (e.key === ' ' && t.tagName !== 'BUTTON') { alternar(); e.preventDefault(); }
+  });
+
+  // Parámetros opcionales en la URL para enlazar un caso concreto:
+  // ?alg=fibonacci&n=5  ·  ?alg=factorial&n=13&tipo=int&pila=25&paso=90
+  const q = new URLSearchParams(location.search);
+  if (q.get('alg') === 'fibonacci') { st.alg = 'fibonacci'; st.N = ALG.fibonacci.nInicial; }
+  if (st.alg === 'factorial' && (q.get('tipo') === 'long' || q.get('tipo') === 'int')) st.tipo = q.get('tipo');
+  if (q.has('pila')) { st.limite = entero(q.get('pila'), 3, 60, st.limite); $('limite').value = st.limite; }
+  if (q.has('n')) st.N = entero(q.get('n'), 0, ALG[st.alg].nMax, st.N);
+  marcarTipo();
+  marcarAlg();
+  reconstruir();
+  if (q.has('paso')) ir(entero(q.get('paso'), 1, st.pasos.length, 1) - 1);
+})();
+</script>
+</body>
+</html>

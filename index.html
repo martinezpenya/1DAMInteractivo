@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1DAM Interactivo</title>
+<meta name="description" content="Recursos interactivos de apoyo a los apuntes de Programación de 1º DAM.">
+<meta name="author" content="David Martínez Peña">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f9; --surface: #ffffff; --ink: #1b1f2a; --muted: #545b6b; --line: #d9dde7; --accent: #3949ab;
+  --shadow: 0 1px 2px rgba(20, 25, 45, .06), 0 2px 8px rgba(20, 25, 45, .05);
+  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #11131a; --surface: #1a1d27; --ink: #e7e9f0; --muted: #a5abbb; --line: #2f3446; --accent: #9fa8ff; --shadow: none; }
+}
+:root[data-theme="dark"] { --bg: #11131a; --surface: #1a1d27; --ink: #e7e9f0; --muted: #a5abbb; --line: #2f3446; --accent: #9fa8ff; --shadow: none; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; }
+a { color: var(--accent); }
+code { font-family: var(--mono); }
+
+/* ---------- Banner de origen (común a todas las páginas de 1DAMInteractivo) ---------- */
+.origen {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px;
+  padding: 7px 16px; background: #1f2a6b; color: #fff;
+  font-family: var(--font); font-size: 13px; line-height: 1.35;
+}
+.origen a { color: #fff; text-decoration: none; }
+.origen a:hover { text-decoration: underline; }
+.origen-marca { display: inline-flex; align-items: center; gap: 8px; }
+.origen-marca svg { flex: none; }
+.origen-autor { opacity: .85; }
+.origen-enlaces { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-left: auto; }
+.origen-enlaces a { color: #c5cdff; font-weight: 500; }
+/* ------------------------------------------------------------------------------------ */
+
+.pagina { max-width: 880px; margin: 0 auto; padding: 32px 16px 40px; }
+.eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 4px 0 8px; font-size: 30px; line-height: 1.2; }
+.lead { margin: 0 0 28px; color: var(--muted); }
+h2 { margin: 0 0 12px; font-size: 14px; font-weight: 600; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.recursos { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.recurso a {
+  display: flex; flex-direction: column; gap: 6px; height: 100%; padding: 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow);
+  color: var(--ink); text-decoration: none;
+}
+.recurso a:hover { border-color: var(--accent); }
+.recurso .ud { font-size: 12px; font-weight: 600; color: var(--accent); }
+.recurso strong { font-size: 17px; }
+.recurso span:last-child { font-size: 14px; color: var(--muted); }
+.pie { margin-top: 32px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- Banner de origen: obligatorio en todas las páginas de 1DAMInteractivo -->
+<div class="origen">
+  <a class="origen-marca" href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+    <span>Recurso de <strong>Programación 1º DAM</strong></span>
+  </a>
+  <span class="origen-autor">David Martínez Peña · CC BY-NC-SA 4.0</span>
+  <span class="origen-enlaces">
+    <a href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">martinezpenya.es/1DAMProgramacion ↗</a>
+  </span>
+</div>
+
+<main class="pagina">
+  <p class="eyebrow">Programación 1º DAM</p>
+  <h1>Recursos interactivos</h1>
+  <p class="lead">Animaciones y simuladores para ver por dentro lo que se explica en los <a href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">apuntes de Programación</a>.</p>
+
+  <h2>Disponibles</h2>
+  <ul class="recursos">
+    <li class="recurso">
+      <a href="recursividad/">
+        <span class="ud">UD04 · Recursividad</span>
+        <strong>Recursividad paso a paso</strong>
+        <span><code>factorial(n)</code> y <code>fibonacci(n)</code>: pila de llamadas, árbol de llamadas, desbordamiento de <code>int</code>/<code>long</code> y <code>StackOverflowError</code>.</span>
+      </a>
+    </li>
+  </ul>
+
+  <p class="pie">© David Martínez Peña · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></p>
+</main>
+</body>
+</html>
