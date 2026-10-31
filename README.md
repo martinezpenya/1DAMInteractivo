@@ -10,6 +10,7 @@ Publicado con GitHub Pages en <https://martinezpenya.es/1DAMInteractivo/>.
 | Unidad | Recurso | Descripción |
 |---|---|---|
 | UD04 · Recursividad | [`recursividad/`](https://martinezpenya.es/1DAMInteractivo/recursividad/) | Recursividad paso a paso con `factorial(n)` y `fibonacci(n)`: pila de llamadas (stack), ocupación de memoria, árbol de llamadas (Fibonacci), desbordamiento aritmético (`int`/`long`) y `StackOverflowError`. |
+| UD04 · Métodos de String | [`metodosString/`](https://martinezpenya.es/1DAMInteractivo/metodosString/) | Métodos de `String` (`charAt`, `substring`, `indexOf`, `trim`, `toLowerCase`, `replace`, `split`...) carácter a carácter, en modo individual o encadenados en un pipeline paso a paso, con casos de ejemplo y errores típicos (`StringIndexOutOfBoundsException`). |
 
 ### Enlazar un caso concreto
 
@@ -24,6 +25,19 @@ Publicado con GitHub Pages en <https://martinezpenya.es/1DAMInteractivo/>.
 | `paso` | número de paso (empieza en 1) | 1 |
 
 Ejemplos: `recursividad/?n=13&tipo=int` muestra el desbordamiento de `int`; `recursividad/?alg=fibonacci&n=5`, el árbol de llamadas de `fibonacci(5)`.
+
+`metodosString/` acepta estos parámetros opcionales en la URL:
+
+| Parámetro | Valores | Por defecto |
+|---|---|---|
+| `preset` | `email`, `extension`, `usuario`, `dominio`, `csv`, `limpiar`, `rango`, `comparar` | — (si se indica, fija el resto) |
+| `modo` | `simple` o `pipeline` | `simple` |
+| `texto` | cadena (urlencoded) | `Hola Mundo` |
+| `metodo`, `arg1`, `arg2` | clave de método y sus argumentos (modo `simple`) | `charAt`, `arg1=0` |
+| `pipeline` | `metodo:arg1,arg2\|metodo:arg1\|...` (modo `pipeline`; `indice:i` para acceder a `[i]`) | — |
+| `paso` | número de paso, empieza en 1 (modo `pipeline`) | 1 |
+
+Ejemplos: `metodosString/?preset=extension` muestra cómo sacar la extensión de un fichero con `indexOf` + `substring`; `metodosString/?modo=pipeline&texto=%20Hola%20&pipeline=trim:|toUpperCase:`, un pipeline manual de dos pasos.
 
 ## Incrustar un recurso en los apuntes
 

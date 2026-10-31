@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Métodos de String paso a paso</title>
+<meta name="description" content="Visualizador interactivo de los métodos de la clase String en Java (charAt, substring, indexOf, trim, toLowerCase, replace, split...) y de cómo se encadenan. Material de Programación 1º DAM.">
+<meta name="author" content="David Martínez Peña">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f9; --surface: #ffffff; --surface-2: #eef0f6; --ink: #1b1f2a; --muted: #545b6b; --line: #d9dde7;
+  --accent: #3949ab; --accent-soft: #e5e8f7; --accent-ink: #ffffff;
+  --hit: #00695c; --hit-soft: #ddf2ee; --drop: #8d93a6; --drop-soft: #eceef3;
+  --err: #b71c1c; --err-soft: #fde8e8; --warn: #a84300; --warn-soft: #fff0e0; --ws: #8d93a6;
+  --tipo-string: #3949ab; --tipo-int: #00695c; --tipo-char: #a84300; --tipo-boolean: #7b1fa2; --tag-ink: #ffffff;
+  --code-bg: #f7f8fc; --code-line: #fff3c4; --kw: #3949ab; --str: #8a4b00; --num: #00695c;
+  --shadow: 0 1px 2px rgba(20, 25, 45, .06), 0 2px 8px rgba(20, 25, 45, .05);
+  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11131a; --surface: #1a1d27; --surface-2: #232736; --ink: #e7e9f0; --muted: #a5abbb; --line: #2f3446;
+    --accent: #9fa8ff; --accent-soft: #272d4f; --accent-ink: #11131a;
+    --hit: #4db6a0; --hit-soft: #163530; --drop: #6b7184; --drop-soft: #232736;
+    --err: #ff8a80; --err-soft: #3d1a1a; --warn: #ffb26b; --warn-soft: #3a2611; --ws: #6b7184;
+    --tipo-string: #9fa8ff; --tipo-int: #4db6a0; --tipo-char: #ffb26b; --tipo-boolean: #ce93d8; --tag-ink: #11131a;
+    --code-bg: #151822; --code-line: #3a3417; --kw: #9fa8ff; --str: #ffcc80; --num: #6fd3c1;
+    --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11131a; --surface: #1a1d27; --surface-2: #232736; --ink: #e7e9f0; --muted: #a5abbb; --line: #2f3446;
+  --accent: #9fa8ff; --accent-soft: #272d4f; --accent-ink: #11131a;
+  --hit: #4db6a0; --hit-soft: #163530; --drop: #6b7184; --drop-soft: #232736;
+  --err: #ff8a80; --err-soft: #3d1a1a; --warn: #ffb26b; --warn-soft: #3a2611; --ws: #6b7184;
+  --tipo-string: #9fa8ff; --tipo-int: #4db6a0; --tipo-char: #ffb26b; --tipo-boolean: #ce93d8; --tag-ink: #11131a;
+  --code-bg: #151822; --code-line: #3a3417; --kw: #9fa8ff; --str: #ffcc80; --num: #6fd3c1;
+  --shadow: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+code, pre, .mono { font-family: var(--mono); font-variant-ligatures: none; }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Banner de origen (común a todas las páginas de 1DAMInteractivo) ---------- */
+.origen {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px;
+  padding: 7px 16px; background: #1f2a6b; color: #fff;
+  font-family: var(--font); font-size: 13px; line-height: 1.35;
+}
+.origen a { color: #fff; text-decoration: none; }
+.origen a:hover { text-decoration: underline; }
+.origen-marca { display: inline-flex; align-items: center; gap: 8px; }
+.origen-marca svg { flex: none; }
+.origen-autor { opacity: .85; }
+.origen-enlaces { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-left: auto; }
+.origen-enlaces a { color: #c5cdff; font-weight: 500; }
+/* ------------------------------------------------------------------------------------ */
+
+.pagina { max-width: 1320px; margin: 0 auto; padding: 12px 16px 24px; }
+.titular { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 10px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 700; }
+.tema {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; cursor: pointer;
+}
+.tema svg { width: 16px; height: 16px; }
+h2 { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+
+/* Barra de configuración */
+.barra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 10px 12px; margin-bottom: 10px; font-size: 13px; }
+.grupo { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.etq { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.sep { width: 1px; align-self: stretch; background: var(--line); }
+.texto-in { min-width: 220px; flex: 1 1 260px; height: 36px; padding: 0 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 14px; }
+.num-in { width: 64px; height: 36px; padding: 0 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 14px; }
+.num-in.corto { width: 48px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg-b { min-width: 52px; height: 36px; padding: 0 10px; border: 0; background: var(--surface); font-weight: 600; font-size: 13px; cursor: pointer; }
+.seg-b + .seg-b { border-left: 1px solid var(--line); }
+.seg-b[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg-b:focus-visible { outline-offset: -3px; }
+.sel { height: 36px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 13px; max-width: 220px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 40px; height: 36px; padding: 0 10px; font-size: 13px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn svg { width: 18px; height: 18px; }
+.btn.primario { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.botones { display: flex; gap: 4px; }
+.vel-range { width: 80px; }
+.progreso { flex: 1 1 200px; display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.progreso input { flex: 1; min-width: 80px; accent-color: var(--accent); }
+.progreso span { white-space: nowrap; }
+
+/* Argumento entero: valor fijo o calculado con indexOf */
+.arg-int { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.arg-indexof { display: inline-flex; align-items: center; gap: 4px; }
+.arg-indexof .sel { max-width: 120px; }
+
+/* Estado: mensaje */
+.estado { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 8px 12px; margin-bottom: 10px; }
+.msg { margin: 0; flex: 1 1 420px; font-size: 15px; line-height: 1.5; min-height: 3em; }
+.msg code { font-size: .92em; background: var(--surface-2); padding: 0 4px; border-radius: 4px; }
+.detalle-arg { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
+.detalle-arg code { font-size: .95em; }
+
+/* Avisos contextuales */
+.aviso-caso { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid; font-size: 14px; }
+.aviso-caso svg { flex: none; width: 20px; height: 20px; margin-top: 1px; }
+.aviso-caso p { margin: 0; }
+.aviso-caso strong { display: block; }
+.aviso-caso.err { background: var(--err-soft); border-color: var(--err); }
+.aviso-caso.err strong, .aviso-caso.err svg { color: var(--err); }
+.aviso-caso.warn { background: var(--warn-soft); border-color: var(--warn); }
+.aviso-caso.warn strong, .aviso-caso.warn svg { color: var(--warn); }
+
+/* Rejilla de paneles */
+.rejilla { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "cadena" "resultado" "codigo" "pasos"; }
+@media (min-width: 860px) {
+  .rejilla { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "cadena resultado" "codigo pasos"; align-items: start; }
+}
+.panel { padding: 12px 12px 14px; min-width: 0; }
+.panel-cadena { grid-area: cadena; }
+.panel-resultado { grid-area: resultado; }
+.panel-codigo { grid-area: codigo; }
+.panel-pasos { grid-area: pasos; }
+
+/* Regla de caracteres */
+.regla { display: flex; flex-wrap: wrap; gap: 2px; padding: 8px 0; }
+.col { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.idx { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.car { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 26px; padding: 0 2px; border-radius: 4px; font-family: var(--mono); font-size: 14px; background: var(--surface-2); }
+.car.hit { background: var(--hit); color: var(--tag-ink); font-weight: 700; }
+.car.drop { background: var(--drop-soft); color: var(--drop); text-decoration: line-through; }
+.car.ws { color: var(--muted); }
+.car.hit.ws { color: var(--tag-ink); }
+.car.vacio { background: none; color: var(--muted); font-style: italic; }
+.fantasma-col .car { background: var(--err-soft); border: 2px dashed var(--err); color: var(--err); }
+
+/* Tarjetas de array (split) */
+.tarjetas-array { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0; }
+.tarjeta-elem { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); }
+.tarjeta-elem .idx { font-size: 11px; }
+.tarjeta-elem .val { font-size: 14px; }
+.tarjeta-elem.hit { background: var(--hit-soft); border-color: var(--hit); }
+.nota-array { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+
+/* Resultado */
+.resultado { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff; }
+.badge.tipo-string { background: var(--tipo-string); }
+.badge.tipo-int { background: var(--tipo-int); }
+.badge.tipo-char { background: var(--tipo-char); }
+.badge.tipo-boolean { background: var(--tipo-boolean); }
+.badge.tipo-stringarr { background: var(--tipo-string); }
+.valor-grande { font-size: 20px; word-break: break-all; }
+.resultado.err .valor-grande, .resultado.err strong { color: var(--err); }
+.aviso-inline { margin: 0; font-size: 13px; color: var(--warn); }
+.aviso-cortado { margin: 0; padding: 8px 10px; background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 8px; font-size: 13px; color: var(--warn); }
+.placeholder { color: var(--muted); font-style: italic; margin: 0; }
+
+/* Código */
+.codigo {
+  margin: 0; padding: 10px 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  overflow-x: auto; font-size: 13.5px; line-height: 1.7;
+}
+.codigo .ln { display: flex; padding-right: 12px; border-left: 3px solid transparent; }
+.codigo .ln .num { flex: none; width: 30px; padding-right: 10px; text-align: right; color: var(--muted); user-select: none; }
+.codigo .ln .txt { white-space: pre-wrap; word-break: break-word; }
+.codigo .ln.actual { background: var(--code-line); border-left-color: var(--accent); }
+.codigo .ln.actual .num { color: var(--ink); font-weight: 600; }
+.codigo .ln.inalcanzable .txt { opacity: .4; text-decoration: line-through; }
+.codigo .ln.comentario .txt { color: var(--err); font-style: italic; }
+.codigo .kw { color: var(--kw); font-weight: 600; }
+.codigo .str { color: var(--str); }
+.codigo .n { color: var(--num); }
+
+/* Lista de pasos (pipeline) */
+.lista-pasos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.paso-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 6px; border: 2px solid var(--line); border-radius: 10px;
+  background: var(--surface-2); font-size: 13px; cursor: grab; transition: box-shadow .12s, opacity .12s;
+}
+.paso-item:active { cursor: grabbing; }
+.paso-item:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.paso-item.actual { border-color: var(--accent); background: var(--accent-soft); }
+.paso-item.inalcanzable { opacity: .5; }
+.paso-item.arrastrando { opacity: .35; }
+.paso-item.sobre-antes { box-shadow: inset 0 3px 0 0 var(--accent); }
+.paso-item.sobre-despues { box-shadow: inset 0 -3px 0 0 var(--accent); }
+.paso-item .manija { flex: none; color: var(--muted); font-size: 15px; letter-spacing: -1px; user-select: none; }
+.paso-item .num {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--mono); font-size: 11px; font-weight: 700;
+}
+.paso-item .desc { flex: 1; font-family: var(--mono); min-width: 0; overflow-wrap: anywhere; }
+.paso-item .acciones { display: flex; gap: 2px; flex: none; }
+.paso-item .acciones button { width: 26px; height: 26px; padding: 0; font-size: 12px; cursor: pointer; }
+.nota-pasos { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+.sin-pasos { font-size: 13px; color: var(--muted); padding: 10px; text-align: center; border: 1px dashed var(--line); border-radius: 8px; }
+.form-paso { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px; margin-top: 10px; background: var(--surface-2); border-radius: 8px; }
+
+kbd { font-family: var(--mono); font-size: 11px; padding: 0 5px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); }
+.pie { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: center; }
+
+@media (max-width: 520px) {
+  .btn.primario { flex: 1; }
+  .sep { display: none; }
+  .tema span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Banner de origen: obligatorio en todas las páginas de 1DAMInteractivo -->
+<div class="origen">
+  <a class="origen-marca" href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+    <span>Recurso de <strong>Programación 1º DAM</strong></span>
+  </a>
+  <span class="origen-autor">David Martínez Peña · CC BY-NC-SA 4.0</span>
+  <span class="origen-enlaces">
+    <a href="https://martinezpenya.es/1DAMProgramacion/UD04/UD04_anexo_ES.html#metodos-string" target="_blank" rel="noopener">Teoría: Métodos de String (UD04)</a>
+    <a href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">martinezpenya.es/1DAMProgramacion ↗</a>
+  </span>
+</div>
+
+<div class="pagina">
+  <header class="titular">
+    <span class="eyebrow">UD04 · Métodos de String</span>
+    <h1>Métodos de <code>String</code> paso a paso</h1>
+    <button type="button" class="tema" id="bTema" aria-label="Cambiar a tema oscuro">
+      <svg id="icoLuna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg id="icoSol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <span id="txtTema">Tema oscuro</span>
+    </button>
+  </header>
+
+  <section class="tarjeta barra" aria-label="Configuración">
+    <div class="seg" role="group" aria-label="Modo">
+      <button type="button" class="seg-b" id="mSimple" aria-pressed="true">Método individual</button>
+      <button type="button" class="seg-b" id="mPipeline" aria-pressed="false">Encadenar métodos</button>
+    </div>
+    <div class="grupo">
+      <label class="etq" for="texto">Cadena</label>
+      <input type="text" id="texto" class="texto-in" value="Hola Mundo" aria-label="Cadena de entrada">
+    </div>
+    <select class="sel" id="casos" aria-label="Casos de ejemplo">
+      <option value="">Casos de ejemplo…</option>
+    </select>
+  </section>
+
+  <section class="tarjeta barra" id="barraForm" aria-label="Elegir método">
+    <span class="etq" id="etqForm">Método</span>
+    <select class="sel" id="selMetodo" aria-label="Método a aplicar"></select>
+    <span class="grupo" id="camposParam"></span>
+    <button type="button" class="btn primario" id="bAplicar">Aplicar</button>
+    <button type="button" class="btn" id="bCancelarEdicion" hidden>Cancelar edición</button>
+  </section>
+
+  <section class="tarjeta barra" id="barraPlayer" aria-label="Reproducción" hidden>
+    <div class="botones">
+      <button type="button" class="btn" id="bInicio" aria-label="Volver al principio" title="Volver al principio (Inicio)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14"/><path d="M18 6l-9 6 9 6z"/></svg>
+      </button>
+      <button type="button" class="btn" id="bAtras" aria-label="Paso atrás" title="Paso atrás (←)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <button type="button" class="btn primario" id="bPlay" title="Reproducir / pausa (espacio)">
+        <svg id="icoPlay" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg>
+        <svg id="icoPausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <span id="txtPlay">Reproducir</span>
+      </button>
+      <button type="button" class="btn" id="bAdelante" aria-label="Paso adelante" title="Paso adelante (→)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button type="button" class="btn" id="bFin" aria-label="Ir al final" title="Ir al final (Fin)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14"/><path d="M6 6l9 6-9 6z"/></svg>
+      </button>
+    </div>
+    <div class="grupo">
+      <label class="etq" for="vel">Velocidad</label>
+      <input class="vel-range" type="range" id="vel" min="0" max="4" value="2" step="1">
+      <output id="velOut" for="vel" class="mono">1×</output>
+    </div>
+    <div class="progreso">
+      <label for="scrub" class="sr-only">Ir a un paso</label>
+      <input type="range" id="scrub" min="0" max="1" value="0">
+      <span id="pasoTxt" class="mono">1 / 1</span>
+    </div>
+  </section>
+
+  <section class="tarjeta estado" aria-label="Qué está pasando">
+    <p class="msg" id="msg" aria-live="polite"></p>
+  </section>
+
+  <div class="aviso-caso err" id="avisoErr" role="note" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+    <p><strong id="avisoErrTitulo">Excepción</strong><span id="avisoErrTexto"></span></p>
+  </div>
+  <div class="aviso-caso warn" id="avisoWarn" role="note" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+    <p><strong>Ojo, no es un error</strong><span id="avisoWarnTexto"></span></p>
+  </div>
+
+  <div class="rejilla">
+    <section class="tarjeta panel panel-cadena" aria-labelledby="hCadena">
+      <h2 id="hCadena">Cadena de entrada de este paso</h2>
+      <div id="cadena"></div>
+    </section>
+
+    <section class="tarjeta panel panel-resultado" aria-labelledby="hResultado">
+      <h2 id="hResultado">Resultado</h2>
+      <div id="resultado"></div>
+    </section>
+
+    <section class="tarjeta panel panel-codigo" aria-labelledby="hCodigo">
+      <h2 id="hCodigo">Código Java equivalente</h2>
+      <pre class="codigo" id="codigo"></pre>
+    </section>
+
+    <section class="tarjeta panel panel-pasos" aria-labelledby="hPasos" id="panelPasos" hidden>
+      <h2 id="hPasos">Pasos del pipeline</h2>
+      <ol class="lista-pasos" id="listaPasos"></ol>
+      <p class="nota-pasos">Arrastra una ficha (⠿) para cambiar el orden, o con el foco en ella usa <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.</p>
+    </section>
+  </div>
+
+  <p class="pie">Atajos: <kbd>←</kbd> <kbd>→</kbd> paso a paso (modo pipeline) · <kbd>Espacio</kbd> reproducir/pausa<br>
+  Material de apoyo de <a href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">Programación 1º DAM</a> · © David Martínez Peña · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const VELOCIDADES = [0.25, 0.5, 1, 2, 4];
+  const RETARDO_BASE = 1300;
+
+  /* ---------- Métodos de String soportados ---------- */
+  const NOMBRE_JAVA = { substring1: 'substring', substring2: 'substring', indexOf1: 'indexOf', indexOf2: 'indexOf' };
+  function nombreJava(clave) { return NOMBRE_JAVA[clave] || clave; }
+
+  const METODOS = {
+    length: { etiqueta: 'length()', params: [], ret: 'int',
+      calcular: (c) => ({ ok: true, valor: c.length }) },
+    charAt: { etiqueta: 'charAt(int i)', params: [{ nombre: 'i', tipo: 'int' }], ret: 'char',
+      calcular: (c, [i]) => {
+        if (i < 0 || i >= c.length) return { ok: false, error: { tipo: 'StringIndexOutOfBoundsException', msg: 'Índice ' + i + ' fuera de rango. Los índices válidos van de 0 a ' + (c.length - 1) + '.', fantasma: i } };
+        return { ok: true, valor: c.charAt(i), hit: [[i, i]] };
+      } },
+    substring1: { etiqueta: 'substring(int i)', params: [{ nombre: 'i', tipo: 'int' }], ret: 'String',
+      calcular: (c, [i]) => {
+        if (i < 0 || i > c.length) return { ok: false, error: { tipo: 'StringIndexOutOfBoundsException', msg: 'Índice ' + i + ' fuera de rango. Los índices válidos van de 0 a ' + c.length + '.', fantasma: i } };
+        return { ok: true, valor: c.substring(i), hit: i < c.length ? [[i, c.length - 1]] : [], drop: i > 0 ? [[0, i - 1]] : [] };
+      } },
+    substring2: { etiqueta: 'substring(int i, int j)', params: [{ nombre: 'i', tipo: 'int' }, { nombre: 'j', tipo: 'int' }], ret: 'String',
+      calcular: (c, [i, j]) => {
+        if (i < 0 || j > c.length || i > j) return { ok: false, error: { tipo: 'StringIndexOutOfBoundsException', msg: 'substring(' + i + ', ' + j + ') no es válido: hace falta 0 ≤ i ≤ j ≤ ' + c.length + '.', fantasma: j > c.length ? j : null } };
+        const drop = [];
+        if (i > 0) drop.push([0, i - 1]);
+        if (j < c.length) drop.push([j, c.length - 1]);
+        return { ok: true, valor: c.substring(i, j), hit: j > i ? [[i, j - 1]] : [], drop: drop };
+      } },
+    indexOf1: { etiqueta: 'indexOf(String s)', params: [{ nombre: 's', tipo: 'string' }], ret: 'int',
+      calcular: (c, [s]) => {
+        const idx = c.indexOf(s);
+        return { ok: true, valor: idx, hit: idx >= 0 && s.length > 0 ? [[idx, idx + s.length - 1]] : [], aviso: idx < 0 ? '"' + s + '" no aparece en la cadena: indexOf() devuelve -1 (no lanza ninguna excepción).' : null };
+      } },
+    indexOf2: { etiqueta: 'indexOf(String s, int i)', params: [{ nombre: 's', tipo: 'string' }, { nombre: 'i', tipo: 'int' }], ret: 'int',
+      calcular: (c, [s, i]) => {
+        const desde = Math.max(0, i);
+        const idx = c.indexOf(s, desde);
+        return { ok: true, valor: idx, hit: idx >= 0 && s.length > 0 ? [[idx, idx + s.length - 1]] : [], aviso: idx < 0 ? '"' + s + '" no aparece a partir del índice ' + desde + ': devuelve -1.' : null };
+      } },
+    lastIndexOf: { etiqueta: 'lastIndexOf(char ch)', params: [{ nombre: 'ch', tipo: 'char' }], ret: 'int',
+      calcular: (c, [ch]) => {
+        const idx = c.lastIndexOf(ch);
+        return { ok: true, valor: idx, hit: idx >= 0 ? [[idx, idx]] : [], aviso: idx < 0 ? "'" + ch + "' no aparece en la cadena: devuelve -1." : null };
+      } },
+    trim: { etiqueta: 'trim()', params: [], ret: 'String',
+      calcular: (c) => {
+        const t = c.trim();
+        if (t === c) return { ok: true, valor: t, aviso: 'No había espacios en blanco al principio o al final: la cadena no cambia.' };
+        const lead = c.length - c.replace(/^\s+/, '').length;
+        const trail = c.length - c.replace(/\s+$/, '').length;
+        const drop = [];
+        if (lead > 0) drop.push([0, lead - 1]);
+        if (trail > 0) drop.push([c.length - trail, c.length - 1]);
+        return { ok: true, valor: t, drop: drop };
+      } },
+    toLowerCase: { etiqueta: 'toLowerCase()', params: [], ret: 'String',
+      calcular: (c) => ({ ok: true, valor: c.toLowerCase(), hit: c.length ? [[0, c.length - 1]] : [] }) },
+    toUpperCase: { etiqueta: 'toUpperCase()', params: [], ret: 'String',
+      calcular: (c) => ({ ok: true, valor: c.toUpperCase(), hit: c.length ? [[0, c.length - 1]] : [] }) },
+    replace: { etiqueta: 'replace(char a, char b)', params: [{ nombre: 'a', tipo: 'char' }, { nombre: 'b', tipo: 'char' }], ret: 'String',
+      calcular: (c, [a, b]) => {
+        const hit = [];
+        for (let k = 0; k < c.length; k++) if (c[k] === a) hit.push([k, k]);
+        return { ok: true, valor: c.split(a).join(b), hit: hit, aviso: hit.length === 0 ? "'" + a + "' no aparece en la cadena: no cambia nada." : null };
+      } },
+    concat: { etiqueta: 'concat(String s)', params: [{ nombre: 's', tipo: 'string' }], ret: 'String',
+      calcular: (c, [s]) => ({ ok: true, valor: c.concat(s), hit: c.length ? [[0, c.length - 1]] : [], nota: 'Se añade "' + s + '" al final.' }) },
+    split: { etiqueta: 'split(String regex)', params: [{ nombre: 'regex', tipo: 'string' }], ret: 'String[]',
+      calcular: (c, [regex]) => {
+        let partes = regex === '' ? c.split('') : c.split(regex);
+        while (partes.length > 0 && partes[partes.length - 1] === '') partes.pop();
+        return { ok: true, valor: partes, hit: c.length ? [[0, c.length - 1]] : [], nota: 'Separador tratado como texto literal (sin caracteres especiales de regex), igual que en los apuntes.' };
+      } },
+    equals: { etiqueta: 'equals(Object o)', params: [{ nombre: 'o', tipo: 'string' }], ret: 'boolean',
+      calcular: (c, [o]) => ({ ok: true, valor: c === o, hit: c.length ? [[0, c.length - 1]] : [] }) },
+    equalsIgnoreCase: { etiqueta: 'equalsIgnoreCase(String s)', params: [{ nombre: 's', tipo: 'string' }], ret: 'boolean',
+      calcular: (c, [s]) => ({ ok: true, valor: c.toLowerCase() === s.toLowerCase(), hit: c.length ? [[0, c.length - 1]] : [] }) },
+    compareTo: { etiqueta: 'compareTo(String s)', params: [{ nombre: 's', tipo: 'string' }], ret: 'int',
+      calcular: (c, [s]) => ({ ok: true, valor: compararJava(c, s), hit: c.length ? [[0, c.length - 1]] : [] }) },
+    compareToIgnoreCase: { etiqueta: 'compareToIgnoreCase(String s)', params: [{ nombre: 's', tipo: 'string' }], ret: 'int',
+      calcular: (c, [s]) => ({ ok: true, valor: compararJava(c.toLowerCase(), s.toLowerCase()), hit: c.length ? [[0, c.length - 1]] : [] }) }
+  };
+
+  function compararJava(a, b) {
+    const n = Math.min(a.length, b.length);
+    for (let k = 0; k < n; k++) { const d = a.charCodeAt(k) - b.charCodeAt(k); if (d !== 0) return d; }
+    return a.length - b.length;
+  }
+
+  /* ---------- Resolución de argumentos: valor fijo, o calculado con indexOf() ---------- */
+  function resolverArg(arg, cadenaActual, varNombre) {
+    if (arg.tipo === 'int' && arg.origen === 'indexOf') {
+      const idx = cadenaActual.indexOf(arg.buscar);
+      const off = arg.offset || 0;
+      const valor = idx + off;
+      const signo = off > 0 ? ' + ' + off : off < 0 ? ' - ' + Math.abs(off) : '';
+      const detalle = varNombre + '.indexOf("' + arg.buscar + '")' + signo + ' = ' + idx + signo + ' = ' + valor;
+      return { valor: valor, detalle: detalle, avisoNoEncontrado: idx === -1 };
+    }
+    if (arg.tipo === 'int') return { valor: parseInt(arg.valor, 10) || 0, detalle: null };
+    if (arg.tipo === 'char') return { valor: (arg.valor || ' ').charAt(0) || ' ', detalle: null };
+    return { valor: arg.valor || '', detalle: null };
+  }
+
+  function argDisplay(arg, varNombre) {
+    if (arg.tipo === 'int') {
+      if (arg.origen === 'indexOf') {
+        const off = arg.offset || 0;
+        return varNombre + '.indexOf("' + arg.buscar + '")' + (off > 0 ? ' + ' + off : off < 0 ? ' - ' + Math.abs(off) : '');
+      }
+      return String(parseInt(arg.valor, 10) || 0);
+    }
+    if (arg.tipo === 'char') return "'" + ((arg.valor || ' ').charAt(0) || ' ') + "'";
+    return '"' + (arg.valor || '') + '"';
+  }
+
+  /* ---------- Cálculo de un paso (método de String, o acceso a [i] de un array) ---------- */
+  function calcularPaso(def, entrada, varNombre) {
+    if (def.tipo === 'indice') {
+      if (entrada.tipo !== 'String[]') return { alcanzable: false, motivo: 'el resultado anterior no es un array (es ' + (entrada.tipo || '-') + '): hace falta un split() antes de poder usar [i].' };
+      const r = resolverArg(def.args[0], '', varNombre);
+      const arr = entrada.valor;
+      if (r.valor < 0 || r.valor >= arr.length) return { alcanzable: true, tipo: null, detalles: [], error: { tipo: 'ArrayIndexOutOfBoundsException', msg: 'Índice ' + r.valor + ' fuera de rango. El array tiene ' + arr.length + ' elemento(s): índices válidos de 0 a ' + (arr.length - 1) + '.', fantasma: r.valor } };
+      return { alcanzable: true, tipo: 'String', valor: arr[r.valor], indiceElegido: r.valor, detalles: [] };
+    }
+    if (entrada.tipo !== 'String') return { alcanzable: false, motivo: 'el resultado anterior es ' + entrada.tipo + ', no String: no se pueden encadenar métodos de String aquí.' };
+    const m = METODOS[def.metodo];
+    const detalles = [];
+    const valores = m.params.map((p, idx) => {
+      const r = resolverArg(def.args[idx], entrada.valor, varNombre);
+      if (r.detalle) detalles.push(p.nombre + ' = ' + r.detalle);
+      return r.valor;
+    });
+    const r = m.calcular(entrada.valor, valores);
+    if (!r.ok) return { alcanzable: true, tipo: null, detalles: detalles, error: r.error };
+    return { alcanzable: true, tipo: m.ret, valor: r.valor, hit: r.hit || [], drop: r.drop || [], aviso: r.aviso || null, nota: r.nota || null, detalles: detalles, valoresResueltos: valores };
+  }
+
+  function calcularSecuencia(texto, defs) {
+    const out = [{ tipo: 'String', valor: texto, alcanzable: true }];
+    for (let k = 0; k < defs.length; k++) {
+      const entrada = out[k];
+      const varNombre = k === 0 ? 'texto' : ('r' + k);
+      out.push(!entrada.alcanzable ? { alcanzable: false, motivo: 'un paso anterior ya cortó la cadena de llamadas.' } : calcularPaso(defs[k], entrada, varNombre));
+    }
+    return out;
+  }
+
+  /* ---------- Presets ---------- */
+  const lit = (tipo, valor) => ({ tipo: tipo, origen: 'literal', valor: valor });
+  const idxArg = (buscar, offset) => ({ tipo: 'int', origen: 'indexOf', buscar: buscar, offset: offset || 0 });
+  const PRESETS = {
+    email: { titulo: 'Normalizar un email', texto: '  Maria.Garcia@IESEDUARDOPRIMO.ES  ', modo: 'pipeline',
+      pasos: [{ tipo: 'metodo', metodo: 'trim', args: [] }, { tipo: 'metodo', metodo: 'toLowerCase', args: [] }] },
+    extension: { titulo: 'Extraer la extensión de un fichero', texto: 'informe_final.pdf', modo: 'pipeline',
+      pasos: [{ tipo: 'metodo', metodo: 'substring1', args: [idxArg('.', 1)] }] },
+    usuario: { titulo: 'Sacar el usuario de un email', texto: 'martinez_dav@ieseduardoprimo.es', modo: 'pipeline',
+      pasos: [{ tipo: 'metodo', metodo: 'substring2', args: [lit('int', 0), idxArg('@', 0)] }] },
+    dominio: { titulo: 'Sacar el dominio de un email', texto: 'martinez_dav@ieseduardoprimo.es', modo: 'pipeline',
+      pasos: [{ tipo: 'metodo', metodo: 'substring1', args: [idxArg('@', 1)] }] },
+    csv: { titulo: 'Separar una lista por comas', texto: 'manzana,pera,platano', modo: 'pipeline',
+      pasos: [{ tipo: 'metodo', metodo: 'split', args: [lit('string', ',')] }, { tipo: 'indice', args: [lit('int', 1)] }] },
+    limpiar: { titulo: 'Normalizar un código de producto', texto: '  ab-45_xx  ', modo: 'pipeline',
+      pasos: [{ tipo: 'metodo', metodo: 'trim', args: [] }, { tipo: 'metodo', metodo: 'toUpperCase', args: [] }, { tipo: 'metodo', metodo: 'replace', args: [lit('char', '_'), lit('char', '-')] }] },
+    rango: { titulo: 'Ver un error típico: índice fuera de rango', texto: 'Hola', modo: 'simple',
+      pasos: [{ tipo: 'metodo', metodo: 'charAt', args: [lit('int', 10)] }] },
+    comparar: { titulo: 'Comparar ignorando mayúsculas', texto: 'Java', modo: 'simple',
+      pasos: [{ tipo: 'metodo', metodo: 'equalsIgnoreCase', args: [lit('string', 'JAVA')] }] }
+  };
+
+  /* ---------- Utilidades de texto / resaltado de código ---------- */
+  function escapar(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function glifo(ch) { return ch === ' ' ? '·' : ch === '\t' ? '⇥' : ch === '\n' ? '¶' : ch; }
+  function enRango(rangos, idx) { return (rangos || []).some(([d, h]) => idx >= d && idx <= h); }
+  function resaltarJava(linea) {
+    const re = /("(?:[^"\\]|\\.)*")|\b(String|int|char|boolean|new|return|class|public|static|void|main)\b|\b(-?\d+)\b/g;
+    let out = '', ult = 0, m;
+    while ((m = re.exec(linea)) !== null) {
+      out += escapar(linea.slice(ult, m.index));
+      const cls = m[1] ? 'str' : m[2] ? 'kw' : 'n';
+      out += '<span class="' + cls + '">' + escapar(m[0]) + '</span>';
+      ult = re.lastIndex;
+    }
+    return out + escapar(linea.slice(ult));
+  }
+  function tipoJava(tipo) { return tipo === 'String[]' ? 'String[]' : tipo; }
+
+  /* ---------- Estado ---------- */
+  const st = { modo: 'simple', texto: 'Hola Mundo', pasosDef: [{ tipo: 'metodo', metodo: 'charAt', args: [lit('int', 0)] }], pasosCalc: [], i: 1, editando: null, play: false, vel: 2, timer: null };
+
+  function tipoEntradaParaForm() {
+    if (st.modo === 'simple') return 'String';
+    const corte = st.editando !== null ? st.editando : st.pasosDef.length;
+    const parcial = calcularSecuencia(st.texto, st.pasosDef.slice(0, corte));
+    const ultimo = parcial[parcial.length - 1];
+    if (!ultimo.alcanzable) return null;
+    // Solo se puede seguir añadiendo pasos si el resultado hasta aquí es String o String[];
+    // int/char/boolean (o un paso que lanzó una excepción) cortan la cadena de llamadas.
+    return (ultimo.tipo === 'String' || ultimo.tipo === 'String[]') ? ultimo.tipo : null;
+  }
+
+  function reconstruir() {
+    st.pasosCalc = calcularSecuencia(st.texto, st.pasosDef);
+    st.i = Math.max(0, Math.min(st.i, st.pasosDef.length));
+    $('scrub').max = Math.max(st.pasosDef.length, 1);
+    pintarForm();
+    pintar();
+  }
+
+  /* ---------- Formulario de método / parámetros ---------- */
+  function pintarForm() {
+    const tipoEntrada = tipoEntradaParaForm();
+    const barraForm = $('barraForm');
+    const sel = $('selMetodo');
+    $('bCancelarEdicion').hidden = st.editando === null;
+    $('etqForm').textContent = st.modo === 'simple' ? 'Método' : (st.editando !== null ? 'Editar paso ' + (st.editando + 1) : 'Añadir paso');
+
+    if (st.modo === 'pipeline' && tipoEntrada === null) {
+      sel.innerHTML = '';
+      sel.hidden = true;
+      $('camposParam').innerHTML = '<p class="aviso-cortado" style="margin:0">No se pueden añadir más pasos aquí: el resultado hasta este punto ya no es un <code>String</code> (o la cadena de llamadas se cortó antes), así que no se puede seguir encadenando <code>.método()</code>.</p>';
+      $('bAplicar').hidden = true;
+      return;
+    }
+    sel.hidden = false;
+    $('bAplicar').hidden = false;
+
+    const opciones = tipoEntrada === 'String[]'
+      ? [['indice', 'Acceder a un elemento [i]']]
+      : Object.keys(METODOS).map((k) => [k, METODOS[k].etiqueta]);
+    const actual = st.editando !== null ? st.pasosDef[st.editando] : (st.modo === 'simple' ? st.pasosDef[0] : null);
+    const valorSel = actual ? (actual.tipo === 'indice' ? 'indice' : actual.metodo) : opciones[0][0];
+    sel.innerHTML = opciones.map(([k, et]) => '<option value="' + k + '"' + (k === valorSel ? ' selected' : '') + '>' + et + '</option>').join('');
+    pintarCampos(valorSel, actual);
+    $('bAplicar').textContent = st.modo === 'simple' ? 'Aplicar' : (st.editando !== null ? 'Guardar cambios' : 'Añadir paso');
+  }
+
+  function pintarCampos(claveMetodo, defActual) {
+    const params = claveMetodo === 'indice' ? [{ nombre: 'i', tipo: 'int' }] : METODOS[claveMetodo].params;
+    const argsPrevios = defActual ? defActual.args : [];
+    let html = '';
+    params.forEach((p, idx) => {
+      const prev = argsPrevios[idx];
+      if (p.tipo === 'int') {
+        const esIndexOf = prev && prev.origen === 'indexOf';
+        html += '<span class="arg-int" data-param="' + idx + '">' +
+          '<label class="etq sr-only">' + p.nombre + '</label>' +
+          '<select class="sel origen-int">' +
+            '<option value="literal"' + (esIndexOf ? '' : ' selected') + '>' + p.nombre + ' = valor fijo</option>' +
+            '<option value="indexOf"' + (esIndexOf ? ' selected' : '') + '>' + p.nombre + ' = indexOf(…)</option>' +
+          '</select>' +
+          '<input type="number" class="num-in literal-int"' + (esIndexOf ? ' hidden' : '') + ' value="' + (prev && prev.origen !== 'indexOf' ? prev.valor : 0) + '">' +
+          '<span class="arg-indexof"' + (esIndexOf ? '' : ' hidden') + '>' +
+            '<input type="text" class="sel buscar-indexOf" placeholder="buscar" value="' + escapar(esIndexOf ? prev.buscar : '') + '">' +
+            '<span>+</span>' +
+            '<input type="number" class="num-in corto offset-indexOf" value="' + (esIndexOf ? prev.offset : 0) + '">' +
+          '</span>' +
+        '</span>';
+      } else if (p.tipo === 'char') {
+        html += '<input type="text" class="num-in" data-param="' + idx + '" data-tipo="char" maxlength="2" placeholder="' + p.nombre + '" value="' + escapar(prev ? prev.valor : '') + '">';
+      } else {
+        html += '<input type="text" class="texto-in" style="min-width:120px;flex:0 0 140px" data-param="' + idx + '" data-tipo="string" placeholder="' + p.nombre + '" value="' + escapar(prev ? prev.valor : '') + '">';
+      }
+    });
+    $('camposParam').innerHTML = html || '<span class="etq">(sin parámetros)</span>';
+    $('camposParam').querySelectorAll('.origen-int').forEach((selOrigen) => {
+      selOrigen.addEventListener('change', () => {
+        const cont = selOrigen.closest('.arg-int');
+        const esIndexOf = selOrigen.value === 'indexOf';
+        cont.querySelector('.literal-int').hidden = esIndexOf;
+        cont.querySelector('.arg-indexof').hidden = !esIndexOf;
+      });
+    });
+  }
+
+  function leerArgsDesdeForm(claveMetodo) {
+    const params = claveMetodo === 'indice' ? [{ nombre: 'i', tipo: 'int' }] : METODOS[claveMetodo].params;
+    return params.map((p, idx) => {
+      if (p.tipo === 'int') {
+        const cont = $('camposParam').querySelector('.arg-int[data-param="' + idx + '"]');
+        if (cont.querySelector('.origen-int').value === 'indexOf') {
+          return { tipo: 'int', origen: 'indexOf', buscar: cont.querySelector('.buscar-indexOf').value, offset: parseInt(cont.querySelector('.offset-indexOf').value, 10) || 0 };
+        }
+        return { tipo: 'int', origen: 'literal', valor: parseInt(cont.querySelector('.literal-int').value, 10) || 0 };
+      }
+      const input = $('camposParam').querySelector('[data-param="' + idx + '"][data-tipo="' + p.tipo + '"]');
+      return { tipo: p.tipo, origen: 'literal', valor: input.value };
+    });
+  }
+
+  function aplicarForm() {
+    const claveMetodo = $('selMetodo').value;
+    const args = leerArgsDesdeForm(claveMetodo);
+    const def = claveMetodo === 'indice' ? { tipo: 'indice', args: args } : { tipo: 'metodo', metodo: claveMetodo, args: args };
+    if (st.modo === 'simple') {
+      st.pasosDef = [def];
+      st.i = 1;
+    } else if (st.editando !== null) {
+      st.pasosDef[st.editando] = def;
+      st.i = st.editando + 1;
+      st.editando = null;
+    } else {
+      st.pasosDef.push(def);
+      st.i = st.pasosDef.length;
+    }
+    reconstruir();
+  }
+
+  function editarPaso(idx) {
+    parar();
+    st.editando = idx;
+    st.i = idx;
+    reconstruir();
+  }
+  function cancelarEdicion() { st.editando = null; reconstruir(); }
+  let enfocarPasoTras = null;
+  function moverPasoA(desde, destino) {
+    if (desde === destino || destino < 0 || destino >= st.pasosDef.length) return;
+    const [item] = st.pasosDef.splice(desde, 1);
+    st.pasosDef.splice(destino, 0, item);
+    st.editando = null;
+    st.i = Math.max(st.i, destino + 1);
+    reconstruir();
+  }
+  function moverPaso(idx, delta) {
+    const j = idx + delta;
+    if (j < 0 || j >= st.pasosDef.length) return;
+    enfocarPasoTras = j;
+    moverPasoA(idx, j);
+  }
+  function eliminarPaso(idx) {
+    st.pasosDef.splice(idx, 1);
+    if (st.editando === idx) st.editando = null;
+    st.i = Math.min(st.i, st.pasosDef.length);
+    reconstruir();
+  }
+
+  /* ---------- Descripción de un paso para la lista / código ---------- */
+  function descripcionPaso(def, varNombre) {
+    if (def.tipo === 'indice') return varNombre + '[' + argDisplay(def.args[0], varNombre) + ']';
+    return varNombre + '.' + nombreJava(def.metodo) + '(' + def.args.map((a) => argDisplay(a, varNombre)).join(', ') + ')';
+  }
+
+  function pintarListaPasos() {
+    $('panelPasos').hidden = st.modo !== 'pipeline';
+    if (st.modo !== 'pipeline') return;
+    const lista = $('listaPasos');
+    if (st.pasosDef.length === 0) {
+      lista.innerHTML = '<li class="sin-pasos">Todavía no hay pasos: añade el primero con el formulario de arriba.</li>';
+      return;
+    }
+    lista.innerHTML = st.pasosDef.map((def, k) => {
+      const varNombre = k === 0 ? 'texto' : ('r' + k);
+      const calc = st.pasosCalc[k + 1];
+      const alcanzable = calc && calc.alcanzable;
+      const cls = ['paso-item'];
+      if (k === st.i - 1) cls.push('actual');
+      if (!alcanzable) cls.push('inalcanzable');
+      return '<li class="' + cls.join(' ') + '" draggable="true" data-idx="' + k + '" tabindex="0" aria-label="Paso ' + (k + 1) + ': ' + escapar(descripcionPaso(def, varNombre)) + '. Alt flecha arriba o abajo para reordenar.">' +
+        '<span class="manija" aria-hidden="true">⠿</span>' +
+        '<span class="num">' + (k + 1) + '</span>' +
+        '<span class="desc">' + escapar(descripcionPaso(def, varNombre)) + '</span>' +
+        '<span class="acciones">' +
+          '<button type="button" class="btn" data-accion="editar" data-idx="' + k + '" title="Editar">✎</button>' +
+          '<button type="button" class="btn" data-accion="eliminar" data-idx="' + k + '" title="Eliminar">✕</button>' +
+        '</span>' +
+      '</li>';
+    }).join('');
+    if (enfocarPasoTras !== null) {
+      const li = lista.querySelector('.paso-item[data-idx="' + enfocarPasoTras + '"]');
+      if (li) li.focus();
+      enfocarPasoTras = null;
+    }
+  }
+
+  /* ---------- Arrastrar y soltar fichas para reordenar el pipeline ---------- */
+  let arrastreIdx = null;
+  function limpiarIndicadoresDrag() {
+    $('listaPasos').querySelectorAll('.paso-item').forEach((li) => li.classList.remove('sobre-antes', 'sobre-despues'));
+  }
+  $('listaPasos').addEventListener('dragstart', (e) => {
+    const li = e.target.closest('.paso-item');
+    if (!li) return;
+    arrastreIdx = parseInt(li.dataset.idx, 10);
+    li.classList.add('arrastrando');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(arrastreIdx));
+  });
+  $('listaPasos').addEventListener('dragend', () => {
+    $('listaPasos').querySelectorAll('.paso-item').forEach((li) => li.classList.remove('arrastrando'));
+    limpiarIndicadoresDrag();
+    arrastreIdx = null;
+  });
+  $('listaPasos').addEventListener('dragover', (e) => {
+    if (arrastreIdx === null) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const li = e.target.closest('.paso-item');
+    limpiarIndicadoresDrag();
+    if (!li) return;
+    const rect = li.getBoundingClientRect();
+    li.classList.add((e.clientY - rect.top) < rect.height / 2 ? 'sobre-antes' : 'sobre-despues');
+  });
+  $('listaPasos').addEventListener('drop', (e) => {
+    if (arrastreIdx === null) return;
+    e.preventDefault();
+    const li = e.target.closest('.paso-item');
+    let destino = st.pasosDef.length - 1;
+    if (li) {
+      const j = parseInt(li.dataset.idx, 10);
+      const rect = li.getBoundingClientRect();
+      const antes = (e.clientY - rect.top) < rect.height / 2;
+      destino = antes ? j : j + 1;
+      if (arrastreIdx < destino) destino -= 1;
+    }
+    const desde = arrastreIdx;
+    limpiarIndicadoresDrag();
+    arrastreIdx = null;
+    moverPasoA(desde, destino);
+  });
+  $('listaPasos').addEventListener('keydown', (e) => {
+    if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    const li = e.target.closest('.paso-item');
+    if (!li) return;
+    moverPaso(parseInt(li.dataset.idx, 10), e.key === 'ArrowUp' ? -1 : 1);
+    e.preventDefault();
+  });
+
+  /* ---------- Render de la cadena / array de entrada ---------- */
+  function pintarCadena(valor, resaltado, fantasma) {
+    const hit = (resaltado && resaltado.hit) || [];
+    const drop = (resaltado && resaltado.drop) || [];
+    if (valor.length === 0) return '<div class="regla"><span class="car vacio">(cadena vacía)</span></div>';
+    let out = '<div class="regla" role="img" aria-label="Cadena con índices">';
+    for (let idx = 0; idx < valor.length; idx++) {
+      const cls = ['car'];
+      if (enRango(hit, idx)) cls.push('hit');
+      if (enRango(drop, idx)) cls.push('drop');
+      const ch = valor[idx];
+      if (ch === ' ' || ch === '\t' || ch === '\n') cls.push('ws');
+      out += '<span class="col"><span class="idx">' + idx + '</span><span class="' + cls.join(' ') + '">' + escapar(glifo(ch)) + '</span></span>';
+    }
+    if (fantasma !== null && fantasma !== undefined && fantasma >= valor.length) {
+      out += '<span class="col fantasma-col"><span class="idx">' + fantasma + '</span><span class="car">?</span></span>';
+    }
+    out += '</div>';
+    return out;
+  }
+  function pintarArray(arr, indiceElegido, fantasma) {
+    if (arr.length === 0) return '<p class="placeholder">split() ha devuelto un array vacío.</p>';
+    let out = '<div class="tarjetas-array">';
+    arr.forEach((s, idx) => {
+      out += '<div class="tarjeta-elem' + (idx === indiceElegido ? ' hit' : '') + '"><span class="idx mono">[' + idx + ']</span><span class="val mono">"' + escapar(s) + '"</span></div>';
+    });
+    if (fantasma !== null && fantasma !== undefined && fantasma >= arr.length) {
+      out += '<div class="tarjeta-elem" style="border:2px dashed var(--err);color:var(--err)"><span class="idx mono">[' + fantasma + ']</span><span class="val mono">?</span></div>';
+    }
+    out += '</div><p class="nota-array">' + arr.length + ' elemento' + (arr.length === 1 ? '' : 's') + ' (equivalente a <code>.length</code> del array).</p>';
+    return out;
+  }
+
+  function pintarValorResultado(tipo, valor) {
+    if (tipo === 'String[]') return '[' + valor.map((s) => '"' + s + '"').join(', ') + ']';
+    if (tipo === 'String') return '"' + valor + '"';
+    if (tipo === 'char') return "'" + valor + "'";
+    return String(valor);
+  }
+
+  /* ---------- Pintado general para el paso st.i ---------- */
+  function pintar() {
+    const entrada = st.pasosCalc[st.i === 0 ? 0 : st.i - 1];
+    const salida = st.pasosCalc[st.i];
+    const def = st.i > 0 ? st.pasosDef[st.i - 1] : null;
+    const varNombre = st.i <= 1 ? 'texto' : ('r' + (st.i - 1));
+
+    // Cadena de entrada de este paso
+    const cCadena = $('cadena');
+    if (!entrada || !entrada.alcanzable) {
+      cCadena.innerHTML = '<p class="placeholder">No disponible: la cadena de llamadas ya se había cortado antes.</p>';
+    } else if (entrada.tipo === 'String[]') {
+      cCadena.innerHTML = pintarArray(entrada.valor, def && def.tipo === 'indice' ? resolverArg(def.args[0], '', varNombre).valor : null, salida && salida.error ? salida.error.fantasma : null);
+    } else {
+      const resaltado = st.i > 0 ? { hit: salida.hit, drop: salida.drop } : null;
+      cCadena.innerHTML = pintarCadena(entrada.valor, resaltado, salida && salida.error ? salida.error.fantasma : null);
+    }
+
+    // Resultado
+    const cResultado = $('resultado');
+    let mensaje;
+    if (st.i === 0) {
+      cResultado.innerHTML = '<p class="placeholder">Cadena inicial: todavía no se ha aplicado ningún método.</p>';
+      mensaje = 'Cadena inicial <code>"' + escapar(st.texto) + '"</code>. ' + (st.modo === 'pipeline' ? 'Añade un paso para empezar.' : '');
+    } else if (!salida.alcanzable) {
+      cResultado.innerHTML = '<p class="aviso-cortado">Paso no ejecutable: ' + escapar(salida.motivo) + '</p>';
+      mensaje = 'Este paso no se llega a ejecutar: ' + salida.motivo;
+    } else if (salida.error) {
+      cResultado.innerHTML = '<div class="resultado err"><strong>' + salida.error.tipo + '</strong><span>' + escapar(salida.error.msg) + '</span></div>';
+      mensaje = escapar(descripcionPaso(def, varNombre)) + ' lanza <code>' + salida.error.tipo + '</code>: el programa terminaría aquí.';
+    } else {
+      const badge = '<span class="badge tipo-' + salida.tipo.replace('[]', 'arr') + '">' + salida.tipo + '</span>';
+      const valorTxt = pintarValorResultado(salida.tipo, salida.valor);
+      cResultado.innerHTML = '<div class="resultado">' + badge + '<code class="mono valor-grande">' + escapar(valorTxt) + '</code>' + (salida.aviso ? '<p class="aviso-inline">' + escapar(salida.aviso) + '</p>' : '') + (salida.nota ? '<p class="aviso-inline" style="color:var(--muted)">' + escapar(salida.nota) + '</p>' : '') + '</div>';
+      mensaje = escapar(descripcionPaso(def, varNombre)) + ' = ' + escapar(valorTxt) + '.';
+      if (salida.detalles && salida.detalles.length) mensaje += salida.detalles.map((d) => '<span class="detalle-arg">' + escapar(d) + '</span>').join('');
+    }
+    $('msg').innerHTML = mensaje;
+
+    // Avisos contextuales
+    const err = salida && salida.alcanzable && salida.error;
+    $('avisoErr').hidden = !err;
+    if (err) { $('avisoErrTitulo').textContent = salida.error.tipo; $('avisoErrTexto').textContent = salida.error.msg; }
+    const warn = salida && salida.alcanzable && !salida.error && salida.aviso;
+    $('avisoWarn').hidden = !warn;
+    if (warn) $('avisoWarnTexto').textContent = salida.aviso;
+
+    // Código
+    pintarCodigo();
+
+    // Lista de pasos (marcar actual)
+    if (st.modo === 'pipeline') pintarListaPasos();
+
+    // Controles de reproducción
+    $('scrub').value = st.i;
+    $('pasoTxt').textContent = (st.i + 1) + ' / ' + (st.pasosDef.length + 1);
+    $('bInicio').disabled = st.i === 0;
+    $('bAtras').disabled = st.i === 0;
+    $('bAdelante').disabled = st.i === st.pasosDef.length;
+    $('bFin').disabled = st.i === st.pasosDef.length;
+  }
+
+  function pintarCodigo() {
+    const lineas = [{ txt: 'String texto = "' + st.texto.replace(/"/g, '\\"') + '";', k: 0 }];
+    st.pasosDef.forEach((def, k) => {
+      const varAnt = k === 0 ? 'texto' : ('r' + k);
+      const varNueva = 'r' + (k + 1);
+      const salida = st.pasosCalc[k + 1];
+      const tipoDecl = salida && salida.alcanzable && salida.tipo ? tipoJava(salida.tipo) : 'var';
+      lineas.push({ txt: tipoDecl + ' ' + varNueva + ' = ' + descripcionPaso(def, varAnt) + ';', k: k + 1 });
+      if (salida && salida.alcanzable && salida.error) lineas.push({ txt: '// ⚠ ' + salida.error.tipo + ': ' + salida.error.msg, comentario: true });
+    });
+    $('codigo').innerHTML = lineas.map((l, idx) => {
+      const cls = ['ln'];
+      if (!l.comentario && l.k === st.i) cls.push('actual');
+      if (!l.comentario && l.k > 0 && st.pasosCalc[l.k] && !st.pasosCalc[l.k].alcanzable) cls.push('inalcanzable');
+      if (l.comentario) cls.push('comentario');
+      return '<span class="' + cls.join(' ') + '"><span class="num">' + (idx + 1) + '</span><span class="txt">' + (l.comentario ? escapar(l.txt) : resaltarJava(l.txt)) + '</span></span>';
+    }).join('');
+  }
+
+  /* ---------- Reproducción (modo pipeline) ---------- */
+  function ir(i) { st.i = Math.max(0, Math.min(st.pasosDef.length, i)); pintar(); }
+  function actualizarBotonPlay() {
+    $('icoPlay').hidden = st.play; $('icoPausa').hidden = !st.play;
+    $('txtPlay').textContent = st.play ? 'Pausa' : 'Reproducir';
+  }
+  function programar() {
+    clearTimeout(st.timer);
+    if (!st.play) return;
+    st.timer = setTimeout(() => {
+      if (st.i >= st.pasosDef.length) { parar(); return; }
+      ir(st.i + 1);
+      if (st.i >= st.pasosDef.length) parar(); else programar();
+    }, RETARDO_BASE / VELOCIDADES[st.vel]);
+  }
+  function reproducir() { if (st.i >= st.pasosDef.length) ir(0); st.play = true; actualizarBotonPlay(); programar(); }
+  function parar() { st.play = false; clearTimeout(st.timer); actualizarBotonPlay(); }
+  function alternar() { st.play ? parar() : reproducir(); }
+
+  /* ---------- Modo simple / pipeline ---------- */
+  function fijarModo(modo) {
+    if (modo === st.modo) return;
+    parar();
+    st.modo = modo;
+    st.editando = null;
+    $('mSimple').setAttribute('aria-pressed', modo === 'simple');
+    $('mPipeline').setAttribute('aria-pressed', modo === 'pipeline');
+    $('barraPlayer').hidden = modo !== 'pipeline';
+    if (modo === 'simple') {
+      st.pasosDef = st.pasosDef.length ? [st.pasosDef[st.pasosDef.length - 1]] : [{ tipo: 'metodo', metodo: 'charAt', args: [lit('int', 0)] }];
+      st.i = 1;
+    } else {
+      st.i = st.pasosDef.length;
+    }
+    reconstruir();
+  }
+
+  function aplicarPreset(clave) {
+    const p = PRESETS[clave];
+    if (!p) return;
+    parar();
+    st.texto = p.texto;
+    $('texto').value = p.texto;
+    st.modo = p.modo;
+    $('mSimple').setAttribute('aria-pressed', p.modo === 'simple');
+    $('mPipeline').setAttribute('aria-pressed', p.modo === 'pipeline');
+    $('barraPlayer').hidden = p.modo !== 'pipeline';
+    st.pasosDef = p.pasos.map((d) => JSON.parse(JSON.stringify(d)));
+    st.editando = null;
+    st.i = st.pasosDef.length;
+    reconstruir();
+  }
+
+  /* ---------- Eventos ---------- */
+  $('mSimple').addEventListener('click', () => fijarModo('simple'));
+  $('mPipeline').addEventListener('click', () => fijarModo('pipeline'));
+  $('texto').addEventListener('input', (e) => { st.texto = e.target.value; reconstruir(); });
+  $('selMetodo').addEventListener('change', (e) => pintarCampos(e.target.value, null));
+  $('bAplicar').addEventListener('click', aplicarForm);
+  $('bCancelarEdicion').addEventListener('click', cancelarEdicion);
+  $('casos').innerHTML = '<option value="">Casos de ejemplo…</option>' + Object.keys(PRESETS).map((k) => '<option value="' + k + '">' + PRESETS[k].titulo + '</option>').join('');
+  $('casos').addEventListener('change', (e) => { if (e.target.value) { aplicarPreset(e.target.value); e.target.value = ''; } });
+
+  $('listaPasos').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-accion]');
+    if (!b) return;
+    const idx = parseInt(b.dataset.idx, 10);
+    if (b.dataset.accion === 'editar') editarPaso(idx);
+    else if (b.dataset.accion === 'eliminar') eliminarPaso(idx);
+    else if (b.dataset.accion === 'subir') moverPaso(idx, -1);
+    else if (b.dataset.accion === 'bajar') moverPaso(idx, 1);
+  });
+
+  $('bInicio').addEventListener('click', () => { parar(); ir(0); });
+  $('bAtras').addEventListener('click', () => { parar(); ir(st.i - 1); });
+  $('bAdelante').addEventListener('click', () => { parar(); ir(st.i + 1); });
+  $('bFin').addEventListener('click', () => { parar(); ir(st.pasosDef.length); });
+  $('bPlay').addEventListener('click', alternar);
+  $('scrub').addEventListener('input', (e) => { parar(); ir(parseInt(e.target.value, 10)); });
+  $('vel').addEventListener('input', (e) => {
+    st.vel = parseInt(e.target.value, 10);
+    $('velOut').textContent = String(VELOCIDADES[st.vel]).replace('.', ',') + '×';
+    programar();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (st.modo !== 'pipeline') return;
+    if (e.key === 'ArrowRight') { parar(); ir(st.i + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft') { parar(); ir(st.i - 1); e.preventDefault(); }
+    else if (e.key === 'Home') { parar(); ir(0); e.preventDefault(); }
+    else if (e.key === 'End') { parar(); ir(st.pasosDef.length); e.preventDefault(); }
+    else if (e.key === ' ' && t.tagName !== 'BUTTON') { alternar(); e.preventDefault(); }
+  });
+
+  // Tema claro/oscuro: por defecto el del sistema; la elección se recuerda en este navegador
+  const raiz = document.documentElement;
+  function esOscuro() {
+    const t = raiz.getAttribute('data-theme');
+    return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function marcarTema() {
+    const o = esOscuro();
+    $('icoLuna').hidden = o; $('icoSol').hidden = !o;
+    $('txtTema').textContent = o ? 'Tema claro' : 'Tema oscuro';
+    $('bTema').setAttribute('aria-label', o ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+  }
+  try { const g = localStorage.getItem('1dam-tema'); if (g === 'dark' || g === 'light') raiz.setAttribute('data-theme', g); } catch (err) { /* sin almacenamiento */ }
+  $('bTema').addEventListener('click', () => {
+    const nuevo = esOscuro() ? 'light' : 'dark';
+    raiz.setAttribute('data-theme', nuevo);
+    try { localStorage.setItem('1dam-tema', nuevo); } catch (err) { /* sin almacenamiento */ }
+    marcarTema();
+  });
+  marcarTema();
+
+  /* ---------- Parámetros opcionales en la URL ----------
+     ?preset=extension
+     ?modo=pipeline&texto=...&pipeline=trim:|toLowerCase:
+     ?modo=simple&texto=Hola&metodo=charAt&arg1=0 */
+  const q = new URLSearchParams(location.search);
+  if (q.has('preset') && PRESETS[q.get('preset')]) {
+    aplicarPreset(q.get('preset'));
+  } else {
+    if (q.has('texto')) st.texto = q.get('texto');
+    if (q.get('modo') === 'pipeline') st.modo = 'pipeline';
+    $('texto').value = st.texto;
+    $('mSimple').setAttribute('aria-pressed', st.modo === 'simple');
+    $('mPipeline').setAttribute('aria-pressed', st.modo === 'pipeline');
+    $('barraPlayer').hidden = st.modo !== 'pipeline';
+    if (st.modo === 'simple' && q.has('metodo') && METODOS[q.get('metodo')]) {
+      const clave = q.get('metodo');
+      const args = METODOS[clave].params.map((p, idx) => {
+        const v = q.get('arg' + (idx + 1)) || '';
+        return { tipo: p.tipo, origen: 'literal', valor: p.tipo === 'int' ? (parseInt(v, 10) || 0) : v };
+      });
+      st.pasosDef = [{ tipo: 'metodo', metodo: clave, args: args }];
+      st.i = 1;
+    } else if (st.modo === 'pipeline' && q.has('pipeline')) {
+      st.pasosDef = q.get('pipeline').split('|').filter(Boolean).map((trozo) => {
+        const [clave, argsTxt] = trozo.split(':');
+        const valoresTxt = (argsTxt || '').split(',').filter((s) => s !== '');
+        if (clave === 'indice') return { tipo: 'indice', args: [lit('int', parseInt(valoresTxt[0], 10) || 0)] };
+        const m = METODOS[clave];
+        if (!m) return null;
+        const args = m.params.map((p, idx) => ({ tipo: p.tipo, origen: 'literal', valor: p.tipo === 'int' ? (parseInt(valoresTxt[idx], 10) || 0) : (valoresTxt[idx] || '') }));
+        return { tipo: 'metodo', metodo: clave, args: args };
+      }).filter(Boolean);
+      st.i = st.pasosDef.length;
+    }
+    reconstruir();
+    if (q.has('paso')) ir(Math.max(0, (parseInt(q.get('paso'), 10) || 1) - 1));
+  }
+})();
+</script>
+</body>
+</html>
