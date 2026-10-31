@@ -11,6 +11,7 @@ Publicado con GitHub Pages en <https://martinezpenya.es/1DAMInteractivo/>.
 |---|---|---|
 | UD04 · Recursividad | [`recursividad/`](https://martinezpenya.es/1DAMInteractivo/recursividad/) | Recursividad paso a paso con `factorial(n)` y `fibonacci(n)`: pila de llamadas (stack), ocupación de memoria, árbol de llamadas (Fibonacci), desbordamiento aritmético (`int`/`long`) y `StackOverflowError`. |
 | UD04 · Métodos de String | [`metodosString/`](https://martinezpenya.es/1DAMInteractivo/metodosString/) | Métodos de `String` (`charAt`, `substring`, `indexOf`, `trim`, `toLowerCase`, `replace`, `split`...) carácter a carácter, en modo individual o encadenados en un pipeline paso a paso, con casos de ejemplo y errores típicos (`StringIndexOutOfBoundsException`). |
+| UD04 · Formato de salida | [`formatoString/`](https://martinezpenya.es/1DAMInteractivo/formatoString/) | Especificadores de `printf`/`String.format` (`%d`, `%f`, `%s`, `%c`, `%b`, `%n`, `%%`) con ancho, alineación, precisión decimal y cero-padding, pieza a pieza, y un modo de tabla de filas para ver cómo se mantiene la alineación. |
 
 ### Enlazar un caso concreto
 
@@ -38,6 +39,17 @@ Ejemplos: `recursividad/?n=13&tipo=int` muestra el desbordamiento de `int`; `rec
 | `paso` | número de paso, empieza en 1 (modo `pipeline`) | 1 |
 
 Ejemplos: `metodosString/?preset=extension` muestra cómo sacar la extensión de un fichero con `indexOf` + `substring`; `metodosString/?modo=pipeline&texto=%20Hola%20&pipeline=trim:|toUpperCase:`, un pipeline manual de dos pasos.
+
+`formatoString/` acepta estos parámetros opcionales en la URL:
+
+| Parámetro | Valores | Por defecto |
+|---|---|---|
+| `preset` | `basico`, `decimales`, `reloj`, `flagsInvalidos`, `tablaDerecha`, `tablaIzquierda`, `cuadrados`, `desborde` | — (si se indica, fija el resto) |
+| `modo` | `linea` o `tabla` | `linea` |
+| `formato` | cadena de formato (urlencoded) | `Hola %s, tienes %d años.%n` |
+| `args` | valores separados por comas, uno por especificador (solo modo `linea`) | — |
+
+Ejemplo: `formatoString/?preset=tablaDerecha` muestra una tabla alineada a la derecha con `%10s %10d %10.2f`.
 
 ## Incrustar un recurso en los apuntes
 

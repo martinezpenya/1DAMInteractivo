@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formato de printf / String.format paso a paso</title>
+<meta name="description" content="Visualizador interactivo de los especificadores de formato de Java (%d, %f, %s, %c, %b, %n, %%): ancho, alineación, precisión decimal y cero-padding, incluida la construcción de tablas alineadas con printf. Material de Programación 1º DAM.">
+<meta name="author" content="David Martínez Peña">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f9; --surface: #ffffff; --surface-2: #eef0f6; --ink: #1b1f2a; --muted: #545b6b; --line: #d9dde7;
+  --accent: #3949ab; --accent-soft: #e5e8f7; --accent-ink: #ffffff;
+  --err: #b71c1c; --err-soft: #fde8e8; --warn: #a84300; --warn-soft: #fff0e0;
+  --tipo-string: #3949ab; --tipo-int: #00695c; --tipo-char: #a84300; --tipo-boolean: #7b1fa2; --tag-ink: #ffffff;
+  --code-bg: #f7f8fc; --code-line: #fff3c4; --kw: #3949ab; --str: #8a4b00; --num: #00695c;
+  --shadow: 0 1px 2px rgba(20, 25, 45, .06), 0 2px 8px rgba(20, 25, 45, .05);
+  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11131a; --surface: #1a1d27; --surface-2: #232736; --ink: #e7e9f0; --muted: #a5abbb; --line: #2f3446;
+    --accent: #9fa8ff; --accent-soft: #272d4f; --accent-ink: #11131a;
+    --err: #ff8a80; --err-soft: #3d1a1a; --warn: #ffb26b; --warn-soft: #3a2611;
+    --tipo-string: #9fa8ff; --tipo-int: #4db6a0; --tipo-char: #ffb26b; --tipo-boolean: #ce93d8; --tag-ink: #11131a;
+    --code-bg: #151822; --code-line: #3a3417; --kw: #9fa8ff; --str: #ffcc80; --num: #6fd3c1;
+    --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11131a; --surface: #1a1d27; --surface-2: #232736; --ink: #e7e9f0; --muted: #a5abbb; --line: #2f3446;
+  --accent: #9fa8ff; --accent-soft: #272d4f; --accent-ink: #11131a;
+  --err: #ff8a80; --err-soft: #3d1a1a; --warn: #ffb26b; --warn-soft: #3a2611;
+  --tipo-string: #9fa8ff; --tipo-int: #4db6a0; --tipo-char: #ffb26b; --tipo-boolean: #ce93d8; --tag-ink: #11131a;
+  --code-bg: #151822; --code-line: #3a3417; --kw: #9fa8ff; --str: #ffcc80; --num: #6fd3c1;
+  --shadow: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+code, pre, .mono { font-family: var(--mono); font-variant-ligatures: none; }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Banner de origen (común a todas las páginas de 1DAMInteractivo) ---------- */
+.origen {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px;
+  padding: 7px 16px; background: #1f2a6b; color: #fff;
+  font-family: var(--font); font-size: 13px; line-height: 1.35;
+}
+.origen a { color: #fff; text-decoration: none; }
+.origen a:hover { text-decoration: underline; }
+.origen-marca { display: inline-flex; align-items: center; gap: 8px; }
+.origen-marca svg { flex: none; }
+.origen-autor { opacity: .85; }
+.origen-enlaces { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-left: auto; }
+.origen-enlaces a { color: #c5cdff; font-weight: 500; }
+/* ------------------------------------------------------------------------------------ */
+
+.pagina { max-width: 1320px; margin: 0 auto; padding: 12px 16px 24px; }
+.titular { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 10px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 700; }
+.tema {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; cursor: pointer;
+}
+.tema svg { width: 16px; height: 16px; }
+h2 { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+
+/* Barra de configuración */
+.barra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 10px 12px; margin-bottom: 10px; font-size: 13px; }
+.grupo { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.etq { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.texto-in { height: 36px; padding: 0 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 14px; }
+#formato { min-width: 220px; flex: 1 1 320px; }
+.num-in { width: 84px; height: 36px; padding: 0 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 14px; }
+.sel { height: 36px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg-b { min-width: 52px; height: 36px; padding: 0 10px; border: 0; background: var(--surface); font-weight: 600; font-size: 13px; cursor: pointer; }
+.seg-b + .seg-b { border-left: 1px solid var(--line); }
+.seg-b[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 36px; height: 32px; padding: 0 10px; font-size: 13px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: .4; cursor: default; }
+.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.chk input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+/* Estado */
+.estado { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 8px 12px; margin-bottom: 10px; }
+.msg { margin: 0; flex: 1 1 420px; font-size: 14px; line-height: 1.5; }
+.msg code { font-size: .92em; background: var(--surface-2); padding: 0 4px; border-radius: 4px; }
+
+/* Avisos */
+.aviso-caso { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid; font-size: 14px; }
+.aviso-caso svg { flex: none; width: 20px; height: 20px; margin-top: 1px; }
+.aviso-caso p { margin: 0; }
+.aviso-caso strong { display: block; }
+.aviso-caso.err { background: var(--err-soft); border-color: var(--err); }
+.aviso-caso.err strong, .aviso-caso.err svg { color: var(--err); }
+.aviso-caso.warn { background: var(--warn-soft); border-color: var(--warn); }
+.aviso-caso.warn strong, .aviso-caso.warn svg { color: var(--warn); }
+.aviso-caso ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* Rejilla */
+.rejilla { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "piezas" "salida" "codigo" "args"; }
+@media (min-width: 900px) {
+  .rejilla { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); grid-template-areas: "piezas args" "salida args" "codigo args"; align-items: start; }
+}
+.panel { padding: 12px 12px 14px; min-width: 0; }
+.panel-piezas { grid-area: piezas; }
+.panel-salida { grid-area: salida; }
+.panel-codigo { grid-area: codigo; }
+.panel-args { grid-area: args; }
+
+/* Desglose del formato en piezas */
+.formato-piezas { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-family: var(--mono); font-size: 13.5px; }
+.pieza-lit { padding: 2px 6px; border-radius: 4px; background: var(--surface-2); color: var(--muted); white-space: pre; }
+.pieza-salto { color: var(--accent); font-weight: 600; }
+.pieza-spec { padding: 3px 8px; border-radius: 6px; color: #fff; font-weight: 600; }
+.pieza-spec.tipo-string { background: var(--tipo-string); }
+.pieza-spec.tipo-int { background: var(--tipo-int); }
+.pieza-spec.tipo-char { background: var(--tipo-char); }
+.pieza-spec.tipo-boolean { background: var(--tipo-boolean); }
+.pieza-spec.desborda { outline: 2px dashed var(--err); outline-offset: 2px; }
+
+/* Salida monoespaciada */
+.salida-mono {
+  margin: 0; padding: 10px 12px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  font-size: 14px; line-height: 1.6; white-space: pre; overflow-x: auto;
+}
+.salida-mono .esp { color: var(--muted); opacity: .6; }
+.salida-mono .fila-desbordada { background: var(--warn-soft); outline: 1px dashed var(--warn); display: inline-block; }
+
+/* Argumentos */
+.fila-args { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.fila-args .campo { display: flex; flex-direction: column; gap: 2px; }
+.fila-args .campo label { font-size: 11px; color: var(--muted); font-weight: 600; }
+.fila-tabla { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; background: var(--surface-2); }
+.fila-tabla.desbordada { border-color: var(--warn); }
+.fila-tabla input { width: 110px; }
+.fila-tabla .num-fila { font-family: var(--mono); color: var(--muted); width: 18px; text-align: right; flex: none; }
+
+/* Código */
+.codigo {
+  margin: 0; padding: 10px 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  overflow-x: auto; font-size: 13.5px; line-height: 1.7;
+}
+.codigo .ln { display: flex; padding-right: 12px; border-left: 3px solid transparent; }
+.codigo .ln .num { flex: none; width: 30px; padding-right: 10px; text-align: right; color: var(--muted); user-select: none; }
+.codigo .ln .txt { white-space: pre-wrap; word-break: break-word; }
+.codigo .kw { color: var(--kw); font-weight: 600; }
+.codigo .str { color: var(--str); }
+.codigo .n { color: var(--num); }
+
+kbd { font-family: var(--mono); font-size: 11px; padding: 0 5px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); }
+.pie { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: center; }
+
+@media (max-width: 520px) {
+  .tema span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Banner de origen: obligatorio en todas las páginas de 1DAMInteractivo -->
+<div class="origen">
+  <a class="origen-marca" href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+    <span>Recurso de <strong>Programación 1º DAM</strong></span>
+  </a>
+  <span class="origen-autor">David Martínez Peña · CC BY-NC-SA 4.0</span>
+  <span class="origen-enlaces">
+    <a href="https://martinezpenya.es/1DAMProgramacion/UD04/UD04_anexo_ES.html#formato-printf" target="_blank" rel="noopener">Teoría: Formato printf (UD04)</a>
+    <a href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">martinezpenya.es/1DAMProgramacion ↗</a>
+  </span>
+</div>
+
+<div class="pagina">
+  <header class="titular">
+    <span class="eyebrow">UD04 · Formato de salida</span>
+    <h1><code>printf</code> / <code>String.format</code> paso a paso</h1>
+    <button type="button" class="tema" id="bTema" aria-label="Cambiar a tema oscuro">
+      <svg id="icoLuna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg id="icoSol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <span id="txtTema">Tema oscuro</span>
+    </button>
+  </header>
+
+  <section class="tarjeta barra" aria-label="Configuración">
+    <div class="seg" role="group" aria-label="Modo">
+      <button type="button" class="seg-b" id="mLinea" aria-pressed="true">Una línea</button>
+      <button type="button" class="seg-b" id="mTabla" aria-pressed="false">Tabla de filas</button>
+    </div>
+    <div class="grupo" style="flex:1 1 320px">
+      <label class="etq" for="formato">Formato</label>
+      <input type="text" id="formato" class="texto-in" value="Hola %s, tienes %d años.%n" aria-label="Cadena de formato">
+    </div>
+    <select class="sel" id="casos" aria-label="Casos de ejemplo">
+      <option value="">Casos de ejemplo…</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="chkEspacios"> Mostrar espacios</label>
+  </section>
+
+  <section class="tarjeta estado" aria-label="Qué está pasando">
+    <p class="msg" id="msg" aria-live="polite"></p>
+  </section>
+
+  <div class="aviso-caso err" id="avisoErr" role="note" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+    <p><strong>Java lanzaría una excepción</strong><span id="avisoErrTexto"></span></p>
+  </div>
+  <div class="aviso-caso warn" id="avisoWarn" role="note" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+    <p><strong>Ojo, se puede descolocar la tabla</strong><ul id="avisoWarnLista"></ul></p>
+  </div>
+
+  <div class="rejilla">
+    <section class="tarjeta panel panel-piezas" aria-labelledby="hPiezas">
+      <h2 id="hPiezas">Formato, pieza a pieza</h2>
+      <div class="formato-piezas" id="piezas"></div>
+    </section>
+
+    <section class="tarjeta panel panel-salida" aria-labelledby="hSalida">
+      <h2 id="hSalida">Salida</h2>
+      <pre class="salida-mono" id="salida"></pre>
+    </section>
+
+    <section class="tarjeta panel panel-codigo" aria-labelledby="hCodigo">
+      <h2 id="hCodigo">Código Java equivalente</h2>
+      <pre class="codigo" id="codigo"></pre>
+    </section>
+
+    <section class="tarjeta panel panel-args" aria-labelledby="tituloArgs">
+      <h2 id="tituloArgs">Argumentos</h2>
+      <div id="args"></div>
+    </section>
+  </div>
+
+  <p class="pie">Material de apoyo de <a href="https://martinezpenya.es/1DAMProgramacion/" target="_blank" rel="noopener">Programación 1º DAM</a> · © David Martínez Peña · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  function escapar(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  /* ---------- Motor de formato (equivalente simplificado de printf / String.format) ---------- */
+  const RE_SPEC = /%([-0]{0,2})(\d+)?(?:\.(\d+))?([dfscb%n])/g;
+
+  function tokenizar(formato) {
+    const tokens = [];
+    let ultimo = 0, m;
+    RE_SPEC.lastIndex = 0;
+    while ((m = RE_SPEC.exec(formato)) !== null) {
+      if (m.index > ultimo) tokens.push({ tipo: 'literal', texto: formato.slice(ultimo, m.index) });
+      const flags = m[1] || '';
+      tokens.push({
+        tipo: 'spec', izq: flags.indexOf('-') !== -1, cero: flags.indexOf('0') !== -1,
+        ancho: m[2] ? parseInt(m[2], 10) : null, prec: m[3] !== undefined ? parseInt(m[3], 10) : null, conv: m[4]
+      });
+      ultimo = RE_SPEC.lastIndex;
+    }
+    if (ultimo < formato.length) tokens.push({ tipo: 'literal', texto: formato.slice(ultimo) });
+    return tokens;
+  }
+
+  const TIPO_ARG = { d: 'int', f: 'double', s: 'String', c: 'char', b: 'boolean' };
+  function especificadoresConArg(tokens) { return tokens.filter((t) => t.tipo === 'spec' && t.conv !== '%' && t.conv !== 'n'); }
+  function especTexto(spec) {
+    return '%' + (spec.izq ? '-' : '') + (spec.cero ? '0' : '') + (spec.ancho !== null ? spec.ancho : '') + (spec.prec !== null ? '.' + spec.prec : '') + spec.conv;
+  }
+
+  function aplicarAncho(texto, ancho, izquierda, ceroPad) {
+    if (ancho === null || texto.length >= ancho) return texto;
+    const relleno = (ceroPad ? '0' : ' ').repeat(ancho - texto.length);
+    if (ceroPad) return texto[0] === '-' ? '-' + relleno + texto.slice(1) : relleno + texto;
+    return izquierda ? texto + relleno : relleno + texto;
+  }
+
+  function formatearValor(spec, valor) {
+    const tipoArg = TIPO_ARG[spec.conv];
+    let bruto;
+    if (spec.conv === 'd') { let n = parseInt(valor, 10); if (isNaN(n)) n = 0; bruto = String(n); }
+    else if (spec.conv === 'f') {
+      let n = parseFloat(valor); if (isNaN(n)) n = 0;
+      const prec = spec.prec === null ? 6 : spec.prec;
+      bruto = n.toFixed(prec).replace('.', ',');
+    } else if (spec.conv === 's') {
+      bruto = String(valor === undefined || valor === null ? '' : valor);
+      if (spec.prec !== null) bruto = bruto.slice(0, spec.prec);
+    } else if (spec.conv === 'c') {
+      bruto = String(valor === undefined || valor === null ? '' : valor).charAt(0) || ' ';
+    } else { bruto = (valor === true || valor === 'true') ? 'true' : 'false'; }
+    // El flag '0' solo es válido con conversiones numéricas (d, f) y no combinado con '-'
+    // (en Java real lanzaría excepción en ambos casos): se avisa y se prioriza '-' si están los dos.
+    const ceroValido = spec.cero && !spec.izq && (spec.conv === 'd' || spec.conv === 'f');
+    const texto = aplicarAncho(bruto, spec.ancho, spec.izq, ceroValido);
+    return { tipoArg: tipoArg, bruto: bruto, texto: texto, desbordaAncho: spec.ancho !== null && bruto.length > spec.ancho, avisoCero: spec.cero && !ceroValido, avisoFlags: spec.cero && spec.izq };
+  }
+
+  function formatearLinea(tokens, valores) {
+    let salida = '', idxArg = 0;
+    const segmentos = [];
+    tokens.forEach((t) => {
+      if (t.tipo === 'literal') { segmentos.push({ tipo: 'literal', texto: t.texto }); salida += t.texto; return; }
+      if (t.conv === '%') { segmentos.push({ tipo: 'literal', texto: '%' }); salida += '%'; return; }
+      if (t.conv === 'n') { segmentos.push({ tipo: 'salto' }); salida += '\n'; return; }
+      const r = formatearValor(t, valores[idxArg]);
+      segmentos.push({ tipo: 'spec', specIdx: idxArg, spec: t, texto: r.texto, bruto: r.bruto, tipoArg: r.tipoArg, desbordaAncho: r.desbordaAncho, avisoCero: r.avisoCero, avisoFlags: r.avisoFlags });
+      salida += r.texto;
+      idxArg++;
+    });
+    return { salida: salida, segmentos: segmentos };
+  }
+
+  /* ---------- Presets ---------- */
+  const PRESETS = {
+    basico: { titulo: 'Saludo con %s y %d', modo: 'linea', formato: 'Hola %s, tienes %d años.%n', args: ['Juan', 25] },
+    decimales: { titulo: 'Precisión de decimales con %.2f', modo: 'linea', formato: 'Pi con 2 decimales: %.2f', args: [3.141592653589793] },
+    reloj: { titulo: 'Cero-padding: un reloj con %02d', modo: 'linea', formato: '%02d:%02d', args: [9, 5] },
+    flagsInvalidos: { titulo: 'Ver un error típico: combinar - y 0', modo: 'linea', formato: '%-05d', args: [7] },
+    tablaDerecha: { titulo: 'Tabla alineada a la derecha', modo: 'tabla', formato: '%10s %10d %10.2f', etiquetas: ['Nombre', 'Edad', 'Peso'], filas: [['Ana', 25, 55.5], ['Juan', 30, 72.3]] },
+    tablaIzquierda: { titulo: 'Tabla alineada a la izquierda', modo: 'tabla', formato: '%-10s %-10d %-10.2f', etiquetas: ['Nombre', 'Edad', 'Peso'], filas: [['Ana', 25, 55.5], ['Juan', 30, 72.3]] },
+    cuadrados: { titulo: 'Tabla de cuadrados y cubos', modo: 'tabla', formato: '%-8d %-8d %-8d', etiquetas: ['Número', 'Cuadrado', 'Cubo'], filas: [[1, 1, 1], [2, 4, 8], [3, 9, 27], [4, 16, 64], [5, 25, 125]] },
+    desborde: { titulo: 'Ver un error típico: una columna que no cabe', modo: 'tabla', formato: '%10s %10d', etiquetas: ['Nombre', 'Edad'], filas: [['Ana', 25], ['Alexandra Fernández', 30]] }
+  };
+
+  /* ---------- Resaltado de código ---------- */
+  function resaltarJava(linea) {
+    const re = /("(?:[^"\\]|\\.)*")|\b(String|int|double|char|boolean|void|class|public|static|for|new)\b|\b(-?\d+(?:\.\d+)?)\b/g;
+    let out = '', ult = 0, m;
+    while ((m = re.exec(linea)) !== null) {
+      out += escapar(linea.slice(ult, m.index));
+      const cls = m[1] ? 'str' : m[2] ? 'kw' : 'n';
+      out += '<span class="' + cls + '">' + escapar(m[0]) + '</span>';
+      ult = re.lastIndex;
+    }
+    return out + escapar(linea.slice(ult));
+  }
+  function literalJava(valor, tipoArg) {
+    if (tipoArg === 'String') return '"' + String(valor).replace(/"/g, '\\"') + '"';
+    if (tipoArg === 'char') return "'" + (String(valor).charAt(0) || ' ') + "'";
+    return String(valor);
+  }
+
+  /* ---------- Estado ---------- */
+  const st = { modo: 'linea', formato: 'Hola %s, tienes %d años.%n', args: ['Juan', 25], etiquetas: [], filas: [], mostrarEspacios: false, tokens: [], specs: [] };
+
+  function tiposDeSpecs(specs) { return specs.map((s) => s.conv).join(','); }
+  function valorPorDefecto(conv) { return conv === 'd' ? 0 : conv === 'f' ? 0 : conv === 'c' ? 'A' : conv === 'b' ? false : ''; }
+
+  function reconstruir() {
+    st.tokens = tokenizar(st.formato);
+    const nuevosSpecs = especificadoresConArg(st.tokens);
+    const mismaForma = tiposDeSpecs(nuevosSpecs) === tiposDeSpecs(st.specs);
+    if (!mismaForma) {
+      st.args = nuevosSpecs.map((s) => valorPorDefecto(s.conv));
+      st.filas = st.filas.map((fila) => nuevosSpecs.map((s, i) => fila[i] !== undefined ? fila[i] : valorPorDefecto(s.conv)));
+      if (st.filas.length === 0 && st.modo === 'tabla') st.filas = [nuevosSpecs.map((s) => valorPorDefecto(s.conv))];
+      st.etiquetas = nuevosSpecs.map((s, i) => st.etiquetas[i] !== undefined ? st.etiquetas[i] : ('Col' + (i + 1)));
+    }
+    st.specs = nuevosSpecs;
+    pintarArgsForm();
+    pintar();
+  }
+
+  /* ---------- Formulario de argumentos ---------- */
+  function campoPara(spec, idx, valor, prefijo) {
+    const id = prefijo + idx;
+    if (spec.conv === 'b') {
+      return '<span class="campo"><label for="' + id + '">arg ' + (idx + 1) + ' (boolean)</label>' +
+        '<select class="sel" id="' + id + '" data-idx="' + idx + '"><option value="true"' + (valor ? ' selected' : '') + '>true</option><option value="false"' + (!valor ? ' selected' : '') + '>false</option></select></span>';
+    }
+    if (spec.conv === 'd') return '<span class="campo"><label for="' + id + '">arg ' + (idx + 1) + ' (int)</label><input type="number" step="1" class="num-in" id="' + id + '" data-idx="' + idx + '" value="' + escapar(valor) + '"></span>';
+    if (spec.conv === 'f') return '<span class="campo"><label for="' + id + '">arg ' + (idx + 1) + ' (double)</label><input type="number" step="any" class="num-in" id="' + id + '" data-idx="' + idx + '" value="' + escapar(valor) + '"></span>';
+    if (spec.conv === 'c') return '<span class="campo"><label for="' + id + '">arg ' + (idx + 1) + ' (char)</label><input type="text" maxlength="2" class="num-in" id="' + id + '" data-idx="' + idx + '" value="' + escapar(valor) + '"></span>';
+    return '<span class="campo"><label for="' + id + '">arg ' + (idx + 1) + ' (String)</label><input type="text" class="texto-in" style="min-width:120px" id="' + id + '" data-idx="' + idx + '" value="' + escapar(valor) + '"></span>';
+  }
+
+  function pintarArgsForm() {
+    const cont = $('args');
+    if (st.specs.length === 0) {
+      cont.innerHTML = '<p class="msg" style="color:var(--muted);margin:0">Este formato no tiene especificadores con argumento (solo texto, <code>%n</code> o <code>%%</code>).</p>';
+      return;
+    }
+    if (st.modo === 'linea') {
+      cont.innerHTML = '<div class="fila-args">' + st.specs.map((s, i) => campoPara(s, i, st.args[i], 'arg')).join('') + '</div>';
+      cont.querySelectorAll('[data-idx]').forEach((el) => el.addEventListener('input', (e) => {
+        const i = parseInt(e.target.dataset.idx, 10);
+        st.args[i] = e.target.tagName === 'SELECT' ? e.target.value === 'true' : e.target.value;
+        pintar();
+      }));
+      return;
+    }
+    // Modo tabla: etiquetas de cabecera + filas
+    let html = '<div class="fila-args"><span class="etq" style="align-self:center">Cabecera</span>' +
+      st.specs.map((s, i) => '<span class="campo"><label class="sr-only">etiqueta ' + (i + 1) + '</label><input type="text" class="texto-in" style="min-width:90px" data-etq="' + i + '" value="' + escapar(st.etiquetas[i] || '') + '"></span>').join('') + '</div>';
+    html += st.filas.map((fila, f) => '<div class="fila-tabla" data-fila="' + f + '"><span class="num-fila">' + (f + 1) + '</span>' +
+      st.specs.map((s, i) => campoPara(s, i, fila[i], 'f' + f + 'a')).join('') +
+      '<button type="button" class="btn" data-quitar-fila="' + f + '" title="Quitar fila">✕</button></div>').join('');
+    html += '<button type="button" class="btn" id="bAnadirFila">+ Añadir fila</button>';
+    cont.innerHTML = html;
+    cont.querySelectorAll('[data-etq]').forEach((el) => el.addEventListener('input', (e) => { st.etiquetas[parseInt(e.target.dataset.etq, 10)] = e.target.value; pintar(); }));
+    cont.querySelectorAll('.fila-tabla [data-idx]').forEach((el) => el.addEventListener('input', (e) => {
+      const fila = parseInt(e.target.closest('.fila-tabla').dataset.fila, 10);
+      const i = parseInt(e.target.dataset.idx, 10);
+      st.filas[fila][i] = e.target.tagName === 'SELECT' ? e.target.value === 'true' : e.target.value;
+      pintar();
+    }));
+    cont.querySelectorAll('[data-quitar-fila]').forEach((el) => el.addEventListener('click', (e) => {
+      st.filas.splice(parseInt(e.target.dataset.quitarFila, 10), 1);
+      pintarArgsForm(); pintar();
+    }));
+    const bAnadir = $('bAnadirFila');
+    if (bAnadir) bAnadir.addEventListener('click', () => { st.filas.push(st.specs.map((s) => valorPorDefecto(s.conv))); pintarArgsForm(); pintar(); });
+  }
+
+  /* ---------- Pintado de resultados ---------- */
+  function pintarPiezas(segmentos) {
+    return segmentos.map((s) => {
+      if (s.tipo === 'literal') return '<span class="pieza-lit">' + escapar(s.texto === '' ? ' ' : s.texto) + '</span>';
+      if (s.tipo === 'salto') return '<span class="pieza-lit pieza-salto">%n ⏎</span>';
+      const claseTipo = s.tipoArg === 'double' ? 'int' : s.tipoArg;
+      return '<span class="pieza-spec tipo-' + claseTipo + (s.desbordaAncho ? ' desborda' : '') + '" title="argumento ' + (s.specIdx + 1) + '">' + especTexto(s.spec) + ' → "' + escapar(s.texto) + '"</span>';
+    }).join('');
+  }
+
+  function textoConEspacios(texto) {
+    return st.mostrarEspacios ? escapar(texto).replace(/ /g, '<span class="esp">·</span>') : escapar(texto);
+  }
+
+  function pintar() {
+    const avisos = [];
+    let html = '';
+    let piezasHtml = '';
+    let codigo = [];
+
+    if (st.modo === 'linea') {
+      const r = formatearLinea(st.tokens, st.args);
+      piezasHtml = pintarPiezas(r.segmentos);
+      html = textoConEspacios(r.salida);
+      r.segmentos.forEach((s) => {
+        if (s.tipo !== 'spec') return;
+        if (s.desbordaAncho) avisos.push('El argumento ' + (s.specIdx + 1) + ' (' + especTexto(s.spec) + ') mide ' + s.bruto.length + ' caracteres: no cabe en el ancho ' + s.spec.ancho + ', así que el campo se ensancha y descoloca lo que venga detrás.');
+        if (s.avisoFlags) avisos.push('En ' + especTexto(s.spec) + ' se combinan <code>-</code> y <code>0</code>: en Java real esto lanza <code>IllegalFormatFlagsException</code>. Aquí se prioriza <code>-</code> (alineado a la izquierda) para poder seguir viendo el resultado.');
+        else if (s.avisoCero) avisos.push('El flag <code>0</code> en ' + especTexto(s.spec) + ' solo es válido con <code>%d</code> o <code>%f</code>: en Java real lanzaría <code>FormatFlagsConversionMismatchException</code>. Aquí se ignora.');
+      });
+      $('msg').innerHTML = '<code>printf("' + escapar(st.formato) + '", ' + st.specs.map((s, i) => literalJava(st.args[i], s.conv === 'd' ? 'int' : TIPO_ARG[s.conv])).join(', ') + ')</code> produce la salida de la derecha.';
+      codigo.push('System.out.printf("' + st.formato.replace(/"/g, '\\"') + '",');
+      codigo.push('    ' + st.specs.map((s, i) => literalJava(st.args[i], TIPO_ARG[s.conv])).join(', ') + ');');
+    } else {
+      // Modo tabla
+      const cabecera = st.tokens.map((t) => t.tipo === 'spec' && t.conv !== '%' && t.conv !== 'n' ? Object.assign({}, t, { conv: 's', cero: false, prec: null }) : t);
+      const rCab = formatearLinea(cabecera, st.etiquetas);
+      piezasHtml = pintarPiezas(formatearLinea(st.tokens, st.filas[0] || []).segmentos);
+      let bloque = textoConEspacios(rCab.salida) + '\n';
+      codigo.push('System.out.printf("' + cabecera.map((t) => t.tipo === 'literal' ? t.texto : especTexto(t)).join('') + '%n",');
+      codigo.push('    ' + st.specs.map((s, i) => '"' + escapar(st.etiquetas[i] || '') + '"').join(', ') + ');');
+      st.filas.forEach((fila, f) => {
+        const r = formatearLinea(st.tokens, fila);
+        const huboDesborde = r.segmentos.some((s) => s.tipo === 'spec' && s.desbordaAncho);
+        bloque += (huboDesborde ? '<span class="fila-desbordada">' + textoConEspacios(r.salida) + '</span>' : textoConEspacios(r.salida)) + '\n';
+        if (huboDesborde) avisos.push('Fila ' + (f + 1) + ': algún valor no cabe en su columna y rompe la alineación de la tabla a partir de ahí.');
+        codigo.push('System.out.printf("' + st.formato.replace(/"/g, '\\"') + '%n",');
+        codigo.push('    ' + st.specs.map((s, i) => literalJava(fila[i], TIPO_ARG[s.conv])).join(', ') + ');');
+      });
+      html = bloque.replace(/\n$/, '');
+      $('msg').innerHTML = 'La misma plantilla <code>"' + escapar(st.formato) + '"</code> se aplica a cada fila: como el ancho de cada columna no cambia, las filas quedan alineadas entre sí.';
+    }
+
+    $('piezas').innerHTML = piezasHtml;
+    $('salida').innerHTML = html;
+    $('codigo').innerHTML = codigo.map((l) => '<span class="ln"><span class="txt">' + resaltarJava(l) + '</span></span>').join('');
+
+    $('avisoErr').hidden = true;
+    const uWarn = $('avisoWarn');
+    uWarn.hidden = avisos.length === 0;
+    $('avisoWarnLista').innerHTML = avisos.map((a) => '<li>' + a + '</li>').join('');
+  }
+
+  /* ---------- Modo y presets ---------- */
+  function fijarModo(modo) {
+    if (modo === st.modo) return;
+    st.modo = modo;
+    $('mLinea').setAttribute('aria-pressed', modo === 'linea');
+    $('mTabla').setAttribute('aria-pressed', modo === 'tabla');
+    $('tituloArgs').textContent = modo === 'linea' ? 'Argumentos' : 'Cabecera y filas';
+    if (modo === 'tabla' && st.filas.length === 0) st.filas = [st.specs.map((s) => valorPorDefecto(s.conv))];
+    pintarArgsForm();
+    pintar();
+  }
+
+  function aplicarPreset(clave) {
+    const p = PRESETS[clave];
+    if (!p) return;
+    st.formato = p.formato;
+    $('formato').value = p.formato;
+    st.tokens = tokenizar(p.formato);
+    st.specs = especificadoresConArg(st.tokens);
+    st.modo = p.modo;
+    $('mLinea').setAttribute('aria-pressed', p.modo === 'linea');
+    $('mTabla').setAttribute('aria-pressed', p.modo === 'tabla');
+    $('tituloArgs').textContent = p.modo === 'linea' ? 'Argumentos' : 'Cabecera y filas';
+    if (p.modo === 'linea') { st.args = (p.args || []).slice(); st.filas = []; st.etiquetas = []; }
+    else { st.filas = (p.filas || []).map((f) => f.slice()); st.etiquetas = (p.etiquetas || []).slice(); st.args = []; }
+    pintarArgsForm();
+    pintar();
+  }
+
+  /* ---------- Eventos ---------- */
+  $('mLinea').addEventListener('click', () => fijarModo('linea'));
+  $('mTabla').addEventListener('click', () => fijarModo('tabla'));
+  $('formato').addEventListener('input', (e) => { st.formato = e.target.value; reconstruir(); });
+  $('chkEspacios').addEventListener('change', (e) => { st.mostrarEspacios = e.target.checked; pintar(); });
+  $('casos').innerHTML = '<option value="">Casos de ejemplo…</option>' + Object.keys(PRESETS).map((k) => '<option value="' + k + '">' + PRESETS[k].titulo + '</option>').join('');
+  $('casos').addEventListener('change', (e) => { if (e.target.value) { aplicarPreset(e.target.value); e.target.value = ''; } });
+
+  // Tema claro/oscuro: por defecto el del sistema; la elección se recuerda en este navegador
+  const raiz = document.documentElement;
+  function esOscuro() {
+    const t = raiz.getAttribute('data-theme');
+    return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function marcarTema() {
+    const o = esOscuro();
+    $('icoLuna').hidden = o; $('icoSol').hidden = !o;
+    $('txtTema').textContent = o ? 'Tema claro' : 'Tema oscuro';
+    $('bTema').setAttribute('aria-label', o ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+  }
+  try { const g = localStorage.getItem('1dam-tema'); if (g === 'dark' || g === 'light') raiz.setAttribute('data-theme', g); } catch (err) { /* sin almacenamiento */ }
+  $('bTema').addEventListener('click', () => {
+    const nuevo = esOscuro() ? 'light' : 'dark';
+    raiz.setAttribute('data-theme', nuevo);
+    try { localStorage.setItem('1dam-tema', nuevo); } catch (err) { /* sin almacenamiento */ }
+    marcarTema();
+  });
+  marcarTema();
+
+  /* ---------- Parámetros opcionales en la URL ----------
+     ?preset=tablaDerecha
+     ?modo=linea&formato=...&args=Juan,25 */
+  const q = new URLSearchParams(location.search);
+  if (q.has('preset') && PRESETS[q.get('preset')]) {
+    aplicarPreset(q.get('preset'));
+  } else {
+    if (q.has('formato')) st.formato = q.get('formato');
+    $('formato').value = st.formato;
+    st.tokens = tokenizar(st.formato);
+    st.specs = especificadoresConArg(st.tokens);
+    if (q.get('modo') === 'tabla') st.modo = 'tabla';
+    $('mLinea').setAttribute('aria-pressed', st.modo === 'linea');
+    $('mTabla').setAttribute('aria-pressed', st.modo === 'tabla');
+    $('tituloArgs').textContent = st.modo === 'linea' ? 'Argumentos' : 'Cabecera y filas';
+    if (q.has('args')) st.args = q.get('args').split(',');
+    else st.args = st.specs.map((s) => valorPorDefecto(s.conv));
+    if (st.modo === 'tabla' && st.filas.length === 0) st.filas = [st.specs.map((s) => valorPorDefecto(s.conv))];
+    pintarArgsForm();
+    pintar();
+  }
+})();
+</script>
+</body>
+</html>
